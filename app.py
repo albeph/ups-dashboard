@@ -6,6 +6,8 @@ A self-contained, zero-dependency web interface for Network UPS Tools (NUT).
 Runs efficiently on any Docker host (from low-power SBCs to full servers).
 """
 
+import hashlib
+import hmac
 import http.cookies
 import json
 import logging
@@ -33,52 +35,242 @@ try:
     with open(VERSION_FILE, "r", encoding="utf-8") as vf:
         APP_VERSION = vf.read().strip()
 except Exception:
-    APP_VERSION = "1.0.0"
+    APP_VERSION = "1.1.0"
 
 DATA_DIR = os.path.join(BASE_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 CONFIG_FILE = os.path.join(DATA_DIR, "config.json")
+KEY_FILE = os.path.join(DATA_DIR, ".secret_key")
+
+
+def get_or_create_app_key() -> bytes:
+    """Retrieve existing 32-byte symmetric master key or generate and persist one with 0600 permissions."""
+    if os.path.isfile(KEY_FILE):
+        try:
+            with open(KEY_FILE, "rb") as f:
+                key = f.read()
+            if len(key) == 32:
+                return key
+        except Exception as e:
+            logger.warning(f"Failed to read secret key from {KEY_FILE}: {e}")
+
+    key = secrets.token_bytes(32)
+    try:
+        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+        mode = 0o600
+        fd = os.open(KEY_FILE, flags, mode)
+        with open(fd, "wb") as f:
+            f.write(key)
+        try:
+            os.chmod(KEY_FILE, 0o600)
+        except Exception:
+            pass
+        logger.info("Generated and saved new application secret key (chmod 0600).")
+    except Exception as e:
+        logger.error(f"Failed to persist application secret key: {e}")
+    return key
+
+
+def hash_password(plain: str) -> str:
+    """Hash password using PBKDF2-HMAC-SHA256 with a unique random 16-byte salt."""
+    if not plain:
+        return ""
+    salt = secrets.token_bytes(16)
+    iterations = 100_000
+    dk = hashlib.pbkdf2_hmac("sha256", plain.encode("utf-8"), salt, iterations)
+    return f"pbkdf2:sha256:{iterations}${salt.hex()}${dk.hex()}"
+
+
+def verify_password(plain: str, hashed: str) -> bool:
+    """Verify plain password against a stored PBKDF2 hash using constant-time comparison."""
+    if not hashed or not plain:
+        return False
+    try:
+        parts = hashed.split("$")
+        if len(parts) != 3:
+            return False
+        method_part, salt_hex, hash_hex = parts
+        method, alg, iters_str = method_part.split(":")
+        if method != "pbkdf2" or alg != "sha256":
+            return False
+        iterations = int(iters_str)
+        salt = bytes.fromhex(salt_hex)
+        expected_dk = bytes.fromhex(hash_hex)
+        actual_dk = hashlib.pbkdf2_hmac("sha256", plain.encode("utf-8"), salt, iterations)
+        return secrets.compare_digest(actual_dk, expected_dk)
+    except Exception:
+        return False
+
+
+def encrypt_secret(plain: str, key: bytes) -> str:
+    """Encrypt reversible secret using HMAC-SHA256 authenticated CTR stream cipher."""
+    if not plain:
+        return ""
+    data = plain.encode("utf-8")
+    nonce = secrets.token_bytes(16)
+    keystream = bytearray()
+    counter = 0
+    while len(keystream) < len(data):
+        block = hmac.new(key, b"keystream:" + nonce + counter.to_bytes(4, "big"), hashlib.sha256).digest()
+        keystream.extend(block)
+        counter += 1
+    ciphertext = bytes(b ^ k for b, k in zip(data, keystream[:len(data)]))
+    tag = hmac.new(key, b"auth:" + nonce + ciphertext, hashlib.sha256).digest()
+    return f"enc:v1:{nonce.hex()}:{ciphertext.hex()}:{tag.hex()}"
+
+
+def decrypt_secret(enc_str: str, key: bytes) -> str:
+    """Decrypt reversible secret with HMAC-SHA256 verification."""
+    if not enc_str:
+        return ""
+    try:
+        parts = enc_str.split(":")
+        if len(parts) != 5 or parts[0] != "enc" or parts[1] != "v1":
+            return ""
+        nonce = bytes.fromhex(parts[2])
+        ciphertext = bytes.fromhex(parts[3])
+        expected_tag = bytes.fromhex(parts[4])
+        tag = hmac.new(key, b"auth:" + nonce + ciphertext, hashlib.sha256).digest()
+        if not secrets.compare_digest(tag, expected_tag):
+            logger.warning("Decryption failed: auth tag mismatch")
+            return ""
+        keystream = bytearray()
+        counter = 0
+        while len(keystream) < len(ciphertext):
+            block = hmac.new(key, b"keystream:" + nonce + counter.to_bytes(4, "big"), hashlib.sha256).digest()
+            keystream.extend(block)
+            counter += 1
+        plain = bytes(b ^ k for b, k in zip(ciphertext, keystream[:len(ciphertext)]))
+        return plain.decode("utf-8", errors="replace")
+    except Exception as e:
+        logger.warning(f"Error during secret decryption: {e}")
+        return ""
 
 
 class ConfigManager:
-    """Manages application settings with persistent JSON storage."""
+    """Manages application settings with persistent JSON storage, password hashing, and encrypted secrets."""
 
     def __init__(self, filepath):
         self.filepath = filepath
         self.lock = threading.Lock()
         self.reload_event = threading.Event()
+        self.secret_key = get_or_create_app_key()
         self.config = self._load_initial()
 
     def _load_initial(self):
         # Defaults derived from environment variables
+        nut_pwd_env = os.getenv("NUT_PASSWORD", "").strip()
+        nut_pwd_file = os.getenv("NUT_PASSWORD_FILE", "").strip()
+        if nut_pwd_file and os.path.isfile(nut_pwd_file):
+            try:
+                with open(nut_pwd_file, "r", encoding="utf-8") as f:
+                    nut_pwd_env = f.read().strip()
+            except Exception as e:
+                logger.warning(f"Failed to read NUT_PASSWORD_FILE ({nut_pwd_file}): {e}")
+
+        dash_pwd_env = os.getenv("DASHBOARD_PASSWORD", "").strip()
+        dash_hash = ""
+        if dash_pwd_env:
+            if dash_pwd_env.startswith("pbkdf2:sha256:"):
+                dash_hash = dash_pwd_env
+            else:
+                dash_hash = hash_password(dash_pwd_env)
+
+        nut_enc = ""
+        if nut_pwd_env:
+            nut_enc = encrypt_secret(nut_pwd_env, self.secret_key)
+
         defaults = {
             "nut_host": os.getenv("NUT_HOST", "127.0.0.1").strip(),
             "nut_port": int(os.getenv("NUT_PORT", "3493")),
             "ups_name": os.getenv("UPS_NAME", "ups").strip(),
             "nut_user": os.getenv("NUT_USER", "").strip(),
-            "nut_password": os.getenv("NUT_PASSWORD", "").strip(),
-            "dashboard_password": os.getenv("DASHBOARD_PASSWORD", "").strip(),
+            "nut_password_encrypted": nut_enc,
+            "dashboard_password_hash": dash_hash,
             "poll_interval": float(os.getenv("POLL_INTERVAL", "2.0")),
             "port": int(os.getenv("PORT", "8080")),
         }
+
+        needs_save = False
 
         # Override with persisted config.json if present
         if os.path.isfile(self.filepath):
             try:
                 with open(self.filepath, "r", encoding="utf-8") as f:
                     saved = json.load(f)
-                    for k, v in saved.items():
-                        if k in defaults:
-                            defaults[k] = v
+
+                # Check for legacy plaintext passwords to migrate
+                if "dashboard_password" in saved:
+                    plain_dash = str(saved.pop("dashboard_password", "")).strip()
+                    if plain_dash:
+                        defaults["dashboard_password_hash"] = hash_password(plain_dash)
+                    needs_save = True
+                    logger.info("Migrated plaintext dashboard_password to PBKDF2 hash.")
+
+                if "nut_password" in saved:
+                    plain_nut = str(saved.pop("nut_password", ""))
+                    if plain_nut:
+                        defaults["nut_password_encrypted"] = encrypt_secret(plain_nut, self.secret_key)
+                    needs_save = True
+                    logger.info("Migrated plaintext nut_password to encrypted secret.")
+
+                for k, v in saved.items():
+                    if k in defaults:
+                        defaults[k] = v
                 logger.info(f"Loaded persistent configuration from {self.filepath}")
             except Exception as e:
                 logger.warning(f"Failed to read {self.filepath}: {e}")
 
+        # Set strict permissions and save migrated config if needed
+        if needs_save:
+            try:
+                self._save_to_disk(defaults)
+                logger.info("Cleaned plaintext credentials and persisted secured config.json.")
+            except Exception as e:
+                logger.error(f"Failed to persist migrated configuration: {e}")
+        elif os.path.isfile(self.filepath):
+            try:
+                os.chmod(self.filepath, 0o600)
+            except Exception:
+                pass
+
         return defaults
+
+    def _save_to_disk(self, config_dict):
+        flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+        mode = 0o600
+        fd = os.open(self.filepath, flags, mode)
+        with open(fd, "w", encoding="utf-8") as f:
+            json.dump(config_dict, f, indent=2)
+        try:
+            os.chmod(self.filepath, 0o600)
+        except Exception:
+            pass
 
     def get(self, key, default=None):
         with self.lock:
             return self.config.get(key, default)
+
+    def get_nut_password(self) -> str:
+        """Returns the decrypted NUT password for socket communication."""
+        with self.lock:
+            enc = self.config.get("nut_password_encrypted", "")
+            if enc:
+                return decrypt_secret(enc, self.secret_key)
+            return ""
+
+    def is_auth_required(self) -> bool:
+        """Returns True if dashboard password protection is active."""
+        with self.lock:
+            return bool(self.config.get("dashboard_password_hash"))
+
+    def verify_dashboard_password(self, candidate: str) -> bool:
+        """Verifies candidate password against stored PBKDF2 hash."""
+        with self.lock:
+            dash_hash = self.config.get("dashboard_password_hash", "")
+            if not dash_hash:
+                return True
+            return verify_password(candidate, dash_hash)
 
     def get_all(self):
         with self.lock:
@@ -91,9 +283,8 @@ class ConfigManager:
                     self.config[k] = v
 
             try:
-                with open(self.filepath, "w", encoding="utf-8") as f:
-                    json.dump(self.config, f, indent=2)
-                logger.info("Configuration updated and saved to disk.")
+                self._save_to_disk(self.config)
+                logger.info("Configuration updated and saved to disk with 0600 permissions.")
             except Exception as e:
                 logger.error(f"Failed to save configuration: {e}")
 
@@ -138,7 +329,7 @@ class NUTDataCache:
                 "battery": self.battery,
                 "last_update": self.last_update,
                 "error_message": self.error_message,
-                "auth_required": bool(config.get("dashboard_password")),
+                "auth_required": config.is_auth_required(),
                 "version": APP_VERSION,
             }
 
@@ -164,7 +355,7 @@ def poll_nut_daemon():
         nut_port = config.get("nut_port")
         ups_name = config.get("ups_name")
         nut_user = config.get("nut_user")
-        nut_pwd = config.get("nut_password")
+        nut_pwd = config.get_nut_password()
         poll_int = config.get("poll_interval")
 
         config.reload_event.clear()
@@ -236,8 +427,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
         pass
 
     def is_authenticated(self):
-        pwd = config.get("dashboard_password")
-        if not pwd:
+        if not config.is_auth_required():
             return True
 
         cookie_header = self.headers.get("Cookie")
@@ -298,8 +488,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "nut_port": current["nut_port"],
                 "ups_name": current["ups_name"],
                 "nut_user": current["nut_user"],
-                "has_nut_password": bool(current["nut_password"]),
-                "has_dashboard_password": bool(current["dashboard_password"]),
+                "has_nut_password": bool(config.get_nut_password()),
+                "has_dashboard_password": config.is_auth_required(),
                 "poll_interval": current["poll_interval"],
                 "version": APP_VERSION,
             })
@@ -356,8 +546,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
         # 1. API: Login
         if path == "/api/login":
-            dash_pwd = config.get("dashboard_password")
-            if not dash_pwd:
+            if not config.is_auth_required():
                 self.send_json({"success": True, "message": "No password configured"})
                 return
 
@@ -367,7 +556,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 req_data = json.loads(body.decode("utf-8"))
                 provided_pwd = req_data.get("password", "")
 
-                if secrets.compare_digest(provided_pwd, dash_pwd):
+                if config.verify_dashboard_password(provided_pwd):
                     new_token = secrets.token_hex(24)
                     with SESSION_LOCK:
                         ACTIVE_SESSIONS.add(new_token)
@@ -421,11 +610,15 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
                 # Update NUT password only if provided
                 if "nut_password" in req_data and req_data["nut_password"] != "":
-                    updates["nut_password"] = req_data["nut_password"]
+                    updates["nut_password_encrypted"] = encrypt_secret(req_data["nut_password"], config.secret_key)
+                elif req_data.get("clear_nut_password"):
+                    updates["nut_password_encrypted"] = ""
 
                 # Update dashboard password only if provided
                 if "new_dashboard_password" in req_data and req_data["new_dashboard_password"] != "":
-                    updates["dashboard_password"] = req_data["new_dashboard_password"]
+                    updates["dashboard_password_hash"] = hash_password(req_data["new_dashboard_password"])
+                elif req_data.get("clear_dashboard_password"):
+                    updates["dashboard_password_hash"] = ""
 
                 if updates:
                     config.update(updates)
@@ -449,9 +642,8 @@ def run_server():
     httpd = ThreadingHTTPServer(server_address, DashboardHandler)
     logger.info(f"UPS Web Dashboard v{APP_VERSION} running on http://0.0.0.0:{port}")
 
-    dash_pwd = config.get("dashboard_password")
-    if dash_pwd:
-        logger.info("Password protection: ENABLED")
+    if config.is_auth_required():
+        logger.info("Password protection: ENABLED (Cryptographic PBKDF2-HMAC-SHA256)")
     else:
         logger.info("Password protection: DISABLED (Open access)")
 

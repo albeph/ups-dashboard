@@ -8,7 +8,7 @@
 ## 📌 Panoramica del Progetto
 
 - **Nome**: `ups-dashboard`
-- **Versione Attuale**: `1.0.0` (definita in [`VERSION`](./VERSION))
+- **Versione Attuale**: `1.1.0` (definita in [`VERSION`](./VERSION))
 - **Scopo**: Piattaforma web autonoma, ultra-leggera e universale per il monitoraggio in tempo reale dei gruppi di continuità gestiti tramite **Network UPS Tools (NUT)**.
 - **Isolamento**: Il progetto è **100% autonomo e scollegato** da qualsiasi altro repository (incluso `ups_sharing`), con proprio repository Git indipendente pronto per GitHub.
 
@@ -18,7 +18,7 @@
 
 ### 1. Zero Dipendenze Esterne (Backend & Frontend)
 - **Backend (`app.py`)**:
-  - Scritto interamente con la **libreria standard di Python 3.12** (`http.server.ThreadingHTTPServer`, `socket`, `threading`, `json`, `secrets`).
+  - Scritto interamente con la **libreria standard di Python 3.12** (`http.server.ThreadingHTTPServer`, `socket`, `threading`, `json`, `secrets`, `hashlib`, `hmac`).
   - **Nessuna dipendenza `pip`**: tempo di build di soli ~3 secondi, footprint di memoria RAM inferiore a **15 MB**.
   - Worker thread in background che interroga il demone NUT (porta TCP 3493) ogni 2 secondi via socket raw, aggiornando una cache thread-safe in memoria.
 - **Frontend (`static/index.html`)**:
@@ -35,7 +35,7 @@
 
 ### 3. Layout a Pagina Intera con Top-Bar
 - **Top-Bar Fissa**:
-  - Brand e Titolo con badge di versione dinamico `v1.0.0`.
+  - Brand e Titolo con badge di versione dinamico `v1.1.0`.
   - Indicatore di connessione in tempo reale con dot pulsante (`Online` / `Offline`).
   - Selettore rapido tra le modalità grafiche:
     - **`[Barre]`**: Barre orizzontali progressive con sfumatura di colore dinamica (ciano &rarr; ambra &rarr; rosso in base al carico).
@@ -52,11 +52,13 @@
   - Nuova password per la dashboard web.
 - **Persistenza**: Le modifiche vengono salvate istantaneamente su `data/config.json` (montato come volume Docker) e ricaricate al volo dal worker socket senza dover riavviare il container!
 
-### 5. Sicurezza e Multi-Piattaforma
-- **Autenticazione Dashboard**:
-  - Opzionale via variabile `DASHBOARD_PASSWORD` (se vuota, l'accesso è pubblico).
-  - Cookie di sessione sicuri (`HttpOnly`, `SameSite=Lax`) con token crittografici (`secrets.token_hex(24)`).
-  - Comparazione password constant-time (`secrets.compare_digest`) per prevenire attacchi di tipo timing.
+### 5. Sicurezza Credenziali e Multi-Piattaforma (v1.1.0)
+- **Zero Password in Chiaro sul Filesystem**:
+  - **Password della Dashboard**: hashing crittografico irreversibile a una via con Salt `PBKDF2-HMAC-SHA256` (100.000 iterazioni). Impossibile risalire alla password in chiaro anche leggendo `config.json`.
+  - **Password del demone NUT**: cifratura simmetrica autenticata a riposo (Encryption at Rest con HMAC-SHA256 CTR stream cipher) tramite chiave master protetta in `data/.secret_key`.
+  - **Permessi Filesystem Reali**: `chmod 0600` applicato automaticamente su `data/config.json` e `data/.secret_key` (accessibili unicamente dall'utente proprietario).
+  - **Comparazione Timing-Safe**: Comparazione password constant-time (`secrets.compare_digest`) per prevenire attacchi di tipo timing.
+  - **Cookie di Sessione**: Cookie crittografici sicuri (`HttpOnly`, `SameSite=Lax`, `secrets.token_hex(24)`).
 - **Docker Multi-Arch**:
   - Immagine base `python:3.12-alpine` compatibile con `linux/amd64`, `linux/arm64` (es. Raspberry Pi Zero 2 W) e `linux/arm/v7`.
   - Container eseguito con utente di sistema non-root `appuser` configurato con UID `1000` (compatibilità nativa con filesystem host Linux).
@@ -75,9 +77,10 @@ ups-dashboard/
 │   └── index.html              # Frontend: Top-Bar, card telemetria, modale impostazioni, login
 ├── data/
 │   ├── .gitkeep                # Traccia la cartella nel repo
-│   └── config.json             # [Ignorato da git] Configurazione di runtime persistita
+│   ├── .secret_key             # [Ignorato da git, chmod 0600] Chiave master crittografica simmetrica
+│   └── config.json             # [Ignorato da git, chmod 0600] Configurazione con password hash/cifrate
 ├── .env.example                # Template per variabili d'ambiente
-├── .gitignore                  # Esclusione di .env, data/*.json, bytecode
+├── .gitignore                  # Esclusione di .env, data/*.json, data/.secret_key, bytecode
 ├── README.md                   # Documentazione professionale pronta per GitHub
 └── WALKTHROUGH.md              # Questo documento di stato e continuità
 ```
@@ -91,12 +94,12 @@ Tutti gli endpoint rispondono in formato JSON con header `Cache-Control: no-stor
 | Metodo | Endpoint | Auth Richiesta | Descrizione |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/` | No (mostra login se protetto) | Serve l'interfaccia web `static/index.html`. |
-| `GET` | `/api/health` | No | Healthcheck del container: `{"status": "ok", "version": "1.0.0"}`. |
-| `GET` | `/api/version` | No | Restituisce la versione dell'applicazione: `{"version": "1.0.0"}`. |
+| `GET` | `/api/health` | No | Healthcheck del container: `{"status": "ok", "version": "1.1.0"}`. |
+| `GET` | `/api/version` | No | Restituisce la versione dell'applicazione: `{"version": "1.1.0"}`. |
 | `GET` | `/api/stats` | Sì (se password attiva) | Restituisce la telemetria live (`watts`, `load`, `battery`, `status`, ecc.). |
-| `GET` | `/api/settings` | Sì | Restituisce i parametri attuali (con password oscurate). |
-| `POST` | `/api/settings` | Sì | Aggiorna e salva i parametri in `data/config.json` e riaggancia il poller. |
-| `POST` | `/api/login` | No | Valida la password e rilascia il cookie di sessione `ups_dashboard_session`. |
+| `GET` | `/api/settings` | Sì | Restituisce i parametri attuali (con flag booleani per le credenziali). |
+| `POST` | `/api/settings` | Sì | Cifra/hasheggia e salva i parametri in `data/config.json` e riaggancia il poller. |
+| `POST` | `/api/login` | No | Valida la password contro l'hash PBKDF2 e rilascia il cookie di sessione. |
 | `POST` | `/api/logout` | No | Invalida la sessione e cancella il cookie. |
 
 ---

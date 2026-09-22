@@ -45,7 +45,6 @@ Modifica `.env` con i parametri del tuo server NUT:
 NUT_HOST=192.168.1.50     # Indirizzo IP del server NUT
 NUT_PORT=3493             # Porta standard NUT
 UPS_NAME=ups              # Nome dell'UPS in ups.conf
-UPS_NOMINAL_WATTS=500     # Potenza nominale in Watt (se non riportata via realpower)
 PORT=8080                 # Porta esposta della dashboard
 POLL_INTERVAL=2.0         # Frequenza di aggiornamento (secondi)
 
@@ -98,9 +97,13 @@ ups-dashboard/
 
 ## 🔒 Sicurezza
 
-- Il container viene eseguito con un utente di sistema non-root (`appuser`).
-- Il confronto delle password usa algoritmi `constant-time` (`secrets.compare_digest`) per prevenire attacchi di tipo timing.
-- I cookie di sessione sono configurati con flag `HttpOnly` e `SameSite=Lax`.
+- **Zero credenziali in chiaro**: Nessuna password viene mai salvata in chiaro sul filesystem.
+- **Password Dashboard con Hash Crittografico**: Le password di accesso al portale sono protette con hashing irreversibile con Salt `PBKDF2-HMAC-SHA256` (100.000 iterazioni) standard library Python.
+- **Password NUT con Cifratura a Riposo**: Le credenziali del demone NUT sono cifrate a riposo (`data/config.json`) tramite cifrario simmetrico autenticato (CTR + HMAC-SHA256) con chiave protetta in `data/.secret_key`.
+- **Permessi Filesystem Restrittivi**: I file di configurazione e le chiavi master sono automaticamente impostati con permessi `chmod 0600` (leggibili solo dall'utente del container).
+- **Protezione Timing Attacks**: Il confronto delle credenziali usa algoritmi `constant-time` (`secrets.compare_digest`).
+- **Cookie di Sessione Protetti**: Configurazione nativa con flag `HttpOnly` e `SameSite=Lax`.
+- **Esecuzione Non-Root**: Il container viene eseguito con un utente di sistema non-root (`appuser`, UID 1000).
 
 ---
 

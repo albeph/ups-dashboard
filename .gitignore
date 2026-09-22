@@ -8,6 +8,7 @@ __pycache__/
 # Runtime configuration data
 data/config.json
 data/*.json
+data/.secret_key
 !data/.gitkeep
 
 # OS metadata
