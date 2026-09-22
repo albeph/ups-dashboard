@@ -98,6 +98,7 @@ Ogni file `.json` deve contenere il blocco `_meta` seguito dalle varie sezioni d
     "field_last_sync": "Dernière Synchro",
     "field_feed": "Alimentation",
     "field_model": "Modèle Détecté",
+    "field_max_watts": "Puissance Maximale",
     "field_metrics": "Charge / Batterie",
     "field_refresh_rate": "Fréquence d'actualisation",
     "field_voltage": "Tension Secteur",

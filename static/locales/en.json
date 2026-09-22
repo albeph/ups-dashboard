@@ -56,6 +56,7 @@
     "field_last_sync": "Last Sync",
     "field_feed": "Power Source",
     "field_model": "Detected Model",
+    "field_max_watts": "Max Power",
     "field_metrics": "Load / Battery",
     "field_refresh_rate": "Refresh Rate",
     "field_voltage": "Mains Voltage",

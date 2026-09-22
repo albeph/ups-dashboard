@@ -1185,6 +1185,10 @@
                   <span id="stat-val-model" class="status-value">--</span>
                 </div>
                 <div class="status-row">
+                  <span class="status-label" data-i18n="tab_status.field_max_watts">Potenza Massima</span>
+                  <span id="stat-val-maxwatts" class="status-value">-- W</span>
+                </div>
+                <div class="status-row">
                   <span class="status-label" data-i18n="tab_status.field_metrics">Carico / Batteria</span>
                   <span id="stat-val-metrics" class="status-value">-- % / -- %</span>
                 </div>
@@ -1803,6 +1807,11 @@
         safeSetClass('subbox-mode-dot', 'status-dot');
       }
 
+      // Se presente potenza nominale, sincronizza il campo nel tab Stato
+      if (data.nominal_watts) {
+        safeSetText('stat-val-maxwatts', `${data.nominal_watts} W`);
+      }
+
       // Timestamp
       const now = new Date();
       safeSetText('last-update-time', t('subbar.last_update', 'Ultimo aggiornamento: ') + now.toLocaleTimeString());
@@ -1950,6 +1959,7 @@
       }
       safeSetText('stat-val-mode', feedText);
       safeSetText('stat-val-model', cfg.ups_model || t('tab_status.model_generic', 'Non rilevato o generico'));
+      safeSetText('stat-val-maxwatts', (isOnline && cfg.nominal_watts) ? `${cfg.nominal_watts} W` : '--');
       
       const metricsTpl = t('tab_status.metrics_unit', '{load}% carico • {batt}% batteria');
       const metricsStr = isOnline ? metricsTpl.replace('{load}', cfg.load || 0).replace('{batt}', cfg.battery || 0) : '--';

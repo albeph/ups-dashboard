@@ -335,6 +335,7 @@ class NUTDataCache:
         self.lock = threading.Lock()
         self.status = "connecting"
         self.watts = None
+        self.nominal_watts = None
         self.load = 0
         self.battery = 100
         self.voltage = None
@@ -344,10 +345,11 @@ class NUTDataCache:
         self.last_update = 0
         self.error_message = ""
 
-    def update(self, status, watts, load, battery, voltage=None, ups_status="", ups_status_raw="", ups_model="", error_message=""):
+    def update(self, status, watts, load, battery, voltage=None, ups_status="", ups_status_raw="", ups_model="", error_message="", nominal_watts=None):
         with self.lock:
             self.status = status
             self.watts = watts
+            self.nominal_watts = nominal_watts
             self.load = load
             self.battery = battery
             self.voltage = voltage
@@ -362,6 +364,7 @@ class NUTDataCache:
             return {
                 "status": self.status,
                 "watts": self.watts,
+                "nominal_watts": self.nominal_watts,
                 "load": self.load,
                 "battery": self.battery,
                 "voltage": self.voltage,
@@ -463,21 +466,25 @@ def poll_nut_daemon():
                         except ValueError:
                             pass
 
-                if watts_val is None and nominal_raw:
+                nom_watts = None
+                if nominal_raw:
                     clean_nom = "".join(c for c in nominal_raw if c.isdigit() or c == ".")
                     if clean_nom:
                         try:
-                            nom_float = float(clean_nom)
-                            watts_val = round((load_val * nom_float) / 100.0)
+                            nom_watts = round(float(clean_nom))
                         except ValueError:
                             pass
+
+                if watts_val is None and nom_watts is not None:
+                    watts_val = round((load_val * nom_watts) / 100.0)
 
                 model_full = f"{mfr_raw} {model_raw}".strip() if (mfr_raw or model_raw) else ""
                 cache.update("online", watts_val, round(load_val), round(battery_val),
                              voltage=voltage_val,
                              ups_status=format_ups_status(status_raw),
                              ups_status_raw=status_raw or "",
-                             ups_model=model_full)
+                             ups_model=model_full,
+                             nominal_watts=nom_watts)
 
         except Exception as e:
             cache.update("offline", None, 0, 0,
@@ -573,6 +580,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "load": telemetry.get("load", 0),
                 "battery": telemetry.get("battery", 0),
                 "watts": telemetry.get("watts", None),
+                "nominal_watts": telemetry.get("nominal_watts", None),
                 "voltage": telemetry.get("voltage", None),
             })
             return

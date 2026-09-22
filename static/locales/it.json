@@ -56,6 +56,7 @@
     "field_last_sync": "Ultimo Sync",
     "field_feed": "Alimentazione",
     "field_model": "Modello Rilevato",
+    "field_max_watts": "Potenza Massima",
     "field_metrics": "Carico / Batteria",
     "field_refresh_rate": "Frequenza Refresh",
     "field_voltage": "Tensione di Rete",
