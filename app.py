@@ -372,6 +372,7 @@ class NUTDataCache:
                 "nut_host": config.get("nut_host"),
                 "nut_port": config.get("nut_port"),
                 "ups_name": config.get("ups_name"),
+                "poll_interval": config.get("poll_interval", 2.0),
             }
 
 
@@ -670,6 +671,14 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
                 if "nut_user" in req_data:
                     updates["nut_user"] = req_data["nut_user"].strip()
+
+                if "poll_interval" in req_data:
+                    try:
+                        p_val = float(req_data["poll_interval"])
+                        if p_val >= 0.5:
+                            updates["poll_interval"] = round(p_val, 1)
+                    except (ValueError, TypeError):
+                        pass
 
                 # Update NUT password only if provided
                 if "nut_password" in req_data and req_data["nut_password"] != "":
