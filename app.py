@@ -397,17 +397,73 @@ def parse_nut_var(line):
     return None
 
 
+# =====================================================================
+# CLIENT ACTIVITY TRACKER & POLLING SUSPENSION
+# =====================================================================
+_last_client_activity = time.time()
+_activity_lock = threading.Lock()
+_wake_event = threading.Event()
+_fresh_poll_event = threading.Event()
+_is_suspended = False
+
+
+def get_idle_timeout() -> float:
+    """Seconds of client inactivity before suspending NUT polling."""
+    poll_int = config.get("poll_interval", 2.0)
+    return max(10.0, poll_int * 2.5)
+
+
+def notify_client_activity() -> bool:
+    """Record that an active client made a request. Returns True if poller was suspended."""
+    global _last_client_activity, _is_suspended
+    with _activity_lock:
+        was_suspended = _is_suspended
+        _last_client_activity = time.time()
+        _wake_event.set()
+        return was_suspended
+
+
+def is_client_idle() -> bool:
+    """Check if the idle timeout has expired since last client request."""
+    with _activity_lock:
+        return (time.time() - _last_client_activity) > get_idle_timeout()
+
+
+def wait_for_fresh_poll(timeout=2.0):
+    """Wait for background worker to complete a fresh query to NUT daemon."""
+    _wake_event.set()
+    _fresh_poll_event.wait(timeout=timeout)
+
+
 def poll_nut_daemon():
-    """Background worker that continuously queries NUT via raw TCP socket."""
+    """Background worker that queries NUT via raw TCP socket only when clients are active."""
+    global _is_suspended
+    first_run = True
+
     while True:
+        poll_int = config.get("poll_interval", 2.0)
+
+        # Suspend polling if no active clients requested data recently
+        if not first_run and is_client_idle():
+            with _activity_lock:
+                _is_suspended = True
+            _fresh_poll_event.clear()
+            print(f"[POLLER] Nessun client attivo negli ultimi {round(get_idle_timeout())}s: polling NUT sospeso (standby).", flush=True)
+            _wake_event.clear()
+            _wake_event.wait()
+            with _activity_lock:
+                _is_suspended = False
+            print("[POLLER] Client attivo rilevato: polling NUT ripreso.", flush=True)
+
+        first_run = False
+        config.reload_event.clear()
+        _wake_event.clear()
+
         nut_host = config.get("nut_host")
         nut_port = config.get("nut_port")
         ups_name = config.get("ups_name")
         nut_user = config.get("nut_user")
         nut_pwd = config.get_nut_password()
-        poll_int = config.get("poll_interval")
-
-        config.reload_event.clear()
 
         try:
             with socket.create_connection((nut_host, nut_port), timeout=3.0) as sock:
@@ -493,6 +549,8 @@ def poll_nut_daemon():
                          ups_status_raw="",
                          ups_model="",
                          error_message=str(e))
+        finally:
+            _fresh_poll_event.set()
 
         # Wait for either interval expiration or reload trigger
         config.reload_event.wait(timeout=poll_int)
@@ -547,6 +605,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if not self.is_authenticated():
                 self.send_json({"error": "Unauthorized", "auth_required": True}, status=401)
                 return
+            was_suspended = notify_client_activity()
+            if was_suspended:
+                wait_for_fresh_poll(timeout=2.0)
             self.send_json(cache.get_data())
             return
 
@@ -560,6 +621,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if not self.is_authenticated():
                 self.send_json({"error": "Unauthorized", "auth_required": True}, status=401)
                 return
+            was_suspended = notify_client_activity()
+            if was_suspended:
+                wait_for_fresh_poll(timeout=2.0)
             current = config.get_all()
             telemetry = cache.get_data()
             self.send_json({
@@ -675,6 +739,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 provided_pwd = req_data.get("password", "")
 
                 if config.verify_dashboard_password(provided_pwd):
+                    notify_client_activity()
                     new_token = secrets.token_hex(24)
                     with SESSION_LOCK:
                         ACTIVE_SESSIONS.add(new_token)
@@ -707,6 +772,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if not self.is_authenticated():
                 self.send_json({"error": "Unauthorized", "auth_required": True}, status=401)
                 return
+            notify_client_activity()
 
             try:
                 content_length = int(self.headers.get("Content-Length", 0))

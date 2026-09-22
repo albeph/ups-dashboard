@@ -1826,6 +1826,10 @@
       try {
         const res = await fetch('/api/stats');
         if (res.status === 401) {
+          if (pollTimerId) {
+            clearInterval(pollTimerId);
+            pollTimerId = null;
+          }
           showLockScreen();
           return;
         }
@@ -1875,6 +1879,7 @@
           document.getElementById('pwd-field').value = '';
           hideLockScreen();
           fetchStats();
+          restartPolling(currentPollIntervalMs / 1000);
         } else {
           errorDiv.innerText = data.error || t('lock_screen.err_wrong_pwd', 'Password errata');
         }
@@ -1887,6 +1892,10 @@
       try {
         await fetch('/api/logout', { method: 'POST' });
       } catch (e) {}
+      if (pollTimerId) {
+        clearInterval(pollTimerId);
+        pollTimerId = null;
+      }
       showLockScreen();
     }
 
@@ -2129,6 +2138,24 @@
     initLocales();
     fetchStats();
     restartPolling(2.0);
+
+    // Pause polling when browser tab/window is hidden or minimized
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (pollTimerId) {
+          clearInterval(pollTimerId);
+          pollTimerId = null;
+        }
+      } else {
+        const lockScreen = document.getElementById('lock-screen');
+        if (!lockScreen || !lockScreen.classList.contains('active')) {
+          fetchStats();
+          if (!pollTimerId) {
+            pollTimerId = setInterval(fetchStats, currentPollIntervalMs);
+          }
+        }
+      }
+    });
   </script>
 </body>
 </html>
