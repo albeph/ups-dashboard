@@ -26,8 +26,9 @@
     "battery_medium": "Media",
     "battery_critical": "Critica",
     "power_feed_label": "Alimentazione",
-    "feed_online": "In linea (Rete elettrica)",
-    "feed_battery": "Su Batteria (OB)",
+    "feed_online": "Rete elettrica",
+    "feed_battery": "Batteria",
+    "feed_bypass": "Bypass",
     "feed_disconnected": "Disconnesso"
   },
   "subbar": {
@@ -131,8 +132,8 @@
     "alert_load_fail": "Impossibile caricare le impostazioni: "
   },
   "ups_status_map": {
-    "OL": "In linea (Rete elettrica)",
-    "OB": "Su Batteria (OB)",
+    "OL": "Rete elettrica",
+    "OB": "Batteria (OB)",
     "LB": "Batteria Bassa (LB)",
     "HB": "Batteria Alta (HB)",
     "RB": "Sostituire Batteria (RB)",

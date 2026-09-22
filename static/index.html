@@ -1077,7 +1077,7 @@
             </div>
             <div id="subbox-mode-container" class="subbox-badge online">
               <span id="subbox-mode-dot" class="status-dot"></span>
-              <span id="subbox-mode-text" data-i18n="cards.feed_online">In linea (Rete elettrica)</span>
+              <span id="subbox-mode-text" data-i18n="cards.feed_online">Rete elettrica</span>
             </div>
           </div>
         </div>
@@ -1088,7 +1088,6 @@
       <div class="sub-bar">
         <div>
           <span id="info-target-server">Target NUT: --</span>
-          <span id="info-ups-status" style="margin-left: 8px; color: #38bdf8;"></span>
         </div>
         <div id="last-update-time" data-i18n="subbar.waiting_data">In attesa dati...</div>
       </div>
@@ -1179,7 +1178,7 @@
               <div class="status-content">
                 <div class="status-row">
                   <span class="status-label" data-i18n="tab_status.field_feed">Alimentazione</span>
-                  <span id="stat-val-mode" class="status-value">In linea (Rete elettrica)</span>
+                  <span id="stat-val-mode" class="status-value">Rete elettrica</span>
                 </div>
                 <div class="status-row">
                   <span class="status-label" data-i18n="tab_status.field_model">Modello Rilevato</span>
@@ -1453,7 +1452,7 @@
 
     // Translate UPS status code(s)
     function translateUpsStatus(rawStatus) {
-      if (!rawStatus) return t('cards.feed_online', 'In linea (Rete elettrica)');
+      if (!rawStatus) return t('cards.feed_online', 'Rete elettrica');
       const curMap = loadedLocales[activeLangCode]?.ups_status_map || {};
       const enMap = loadedLocales['en']?.ups_status_map || {};
       const map = Object.assign({}, enMap, curMap);
@@ -1670,16 +1669,10 @@
         safeSetText('info-target-server', `${t('subbar.target_nut', 'Target NUT')}: ${data.nut_host}:${data.nut_port}${ups}`);
       }
 
-      const subStatus = document.getElementById('info-ups-status');
-
       if (!isOnline) {
         safeSetClass(dot, 'status-dot offline');
         safeSetClass(connText, 'status-text offline');
         safeSetText(connText, t('topbar.status_offline', 'Offline'));
-        if (subStatus) {
-          safeSetText(subStatus, t('subbar.server_unreachable', '• Server non raggiungibile'));
-          safeSetStyle(subStatus, 'color', '#ef4444');
-        }
         safeSetText('last-update-time', data.error_message ? (t('subbar.error_prefix', 'Errore: ') + data.error_message) : t('subbar.nut_unreachable', 'Server NUT non raggiungibile'));
         safeSetText('subbox-voltage-val', '-- V');
         safeSetClass('subbox-mode-container', 'subbox-badge offline');
@@ -1698,11 +1691,6 @@
         safeSetClass(dot, 'status-dot');
         safeSetClass(connText, 'status-text');
         safeSetText(connText, t('topbar.status_online', 'Online'));
-      }
-
-      if (subStatus) {
-        safeSetText(subStatus, `• ${displayUpsStatus}`);
-        safeSetStyle(subStatus, 'color', isBattery ? '#f59e0b' : '#38bdf8');
       }
 
       // Watts
@@ -1803,11 +1791,15 @@
       // Stato alimentazione nel box sotto la percentuale di batteria
       if (isBattery) {
         safeSetClass('subbox-mode-container', 'subbox-badge battery');
-        safeSetText('subbox-mode-text', displayUpsStatus || t('cards.feed_battery', 'Su Batteria (OB)'));
+        safeSetText('subbox-mode-text', t('cards.feed_battery', 'Batteria'));
+        safeSetClass('subbox-mode-dot', 'status-dot warning');
+      } else if (data.ups_status_raw && data.ups_status_raw.includes('BYPASS')) {
+        safeSetClass('subbox-mode-container', 'subbox-badge warning');
+        safeSetText('subbox-mode-text', t('cards.feed_bypass', 'Bypass'));
         safeSetClass('subbox-mode-dot', 'status-dot warning');
       } else {
         safeSetClass('subbox-mode-container', 'subbox-badge online');
-        safeSetText('subbox-mode-text', displayUpsStatus || t('cards.feed_online', 'In linea (Rete elettrica)'));
+        safeSetText('subbox-mode-text', t('cards.feed_online', 'Rete elettrica'));
         safeSetClass('subbox-mode-dot', 'status-dot');
       }
 
@@ -1948,8 +1940,15 @@
         }
       }
 
-      const displayUpsStatus = translateUpsStatus(cfg.ups_status_raw || cfg.ups_status || (isBattery ? 'OB' : 'OL'));
-      safeSetText('stat-val-mode', isOnline ? displayUpsStatus : t('subbar.nut_unreachable', 'Server NUT non raggiungibile'));
+      let feedText = t('cards.feed_online', 'Rete elettrica');
+      if (!isOnline) {
+        feedText = t('subbar.nut_unreachable', 'Server NUT non raggiungibile');
+      } else if (isBattery) {
+        feedText = t('cards.feed_battery', 'Batteria');
+      } else if (cfg.ups_status_raw && cfg.ups_status_raw.includes('BYPASS')) {
+        feedText = t('cards.feed_bypass', 'Bypass');
+      }
+      safeSetText('stat-val-mode', feedText);
       safeSetText('stat-val-model', cfg.ups_model || t('tab_status.model_generic', 'Non rilevato o generico'));
       
       const metricsTpl = t('tab_status.metrics_unit', '{load}% carico • {batt}% batteria');

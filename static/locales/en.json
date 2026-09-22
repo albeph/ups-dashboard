@@ -26,8 +26,9 @@
     "battery_medium": "Medium",
     "battery_critical": "Critical",
     "power_feed_label": "Power Source",
-    "feed_online": "Online (Utility Power)",
-    "feed_battery": "On Battery (OB)",
+    "feed_online": "Utility Power",
+    "feed_battery": "Battery",
+    "feed_bypass": "Bypass",
     "feed_disconnected": "Disconnected"
   },
   "subbar": {
@@ -131,8 +132,8 @@
     "alert_load_fail": "Unable to load settings: "
   },
   "ups_status_map": {
-    "OL": "Online (Utility Power)",
-    "OB": "On Battery (OB)",
+    "OL": "Utility Power",
+    "OB": "Battery (OB)",
     "LB": "Low Battery (LB)",
     "HB": "High Battery (HB)",
     "RB": "Replace Battery (RB)",

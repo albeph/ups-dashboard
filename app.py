@@ -302,11 +302,11 @@ COOKIE_NAME = "ups_dashboard_session"
 def format_ups_status(raw_status: str) -> str:
     """Format raw NUT ups.status flags (e.g. OL, OB, CHRG) into human-readable Italian labels."""
     if not raw_status:
-        return "In linea"
+        return "Rete elettrica"
     flags = raw_status.strip().upper().split()
     labels = []
     if "OL" in flags:
-        labels.append("In linea (Rete elettrica)")
+        labels.append("Rete elettrica")
     if "OB" in flags:
         labels.append("Su batteria (Blackout)")
     if "LB" in flags:
