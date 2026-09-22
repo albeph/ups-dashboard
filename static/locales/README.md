@@ -68,7 +68,7 @@ Ogni file `.json` deve contenere il blocco `_meta` seguito dalle varie sezioni d
     "battery_medium": "Moyenne",
     "battery_critical": "Critique",
     "power_feed_label": "Alimentation",
-    "feed_online": "En ligne (Secteur AC)",
+    "feed_online": "En ligne (Secteur électrique)",
     "feed_battery": "Sur batterie (OB)",
     "feed_disconnected": "Déconnecté"
   },
@@ -173,7 +173,7 @@ Ogni file `.json` deve contenere il blocco `_meta` seguito dalle varie sezioni d
     "alert_load_fail": "Impossible de charger les paramètres : "
   },
   "ups_status_map": {
-    "OL": "En ligne (Secteur AC)",
+    "OL": "En ligne (Secteur électrique)",
     "OB": "Sur batterie (OB)",
     "LB": "Batterie basse (LB)",
     "HB": "Batterie haute (HB)",

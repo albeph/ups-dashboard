@@ -306,7 +306,7 @@ def format_ups_status(raw_status: str) -> str:
     flags = raw_status.strip().upper().split()
     labels = []
     if "OL" in flags:
-        labels.append("In linea (Rete AC)")
+        labels.append("In linea (Rete elettrica)")
     if "OB" in flags:
         labels.append("Su batteria (Blackout)")
     if "LB" in flags:

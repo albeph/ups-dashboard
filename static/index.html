@@ -1077,7 +1077,7 @@
             </div>
             <div id="subbox-mode-container" class="subbox-badge online">
               <span id="subbox-mode-dot" class="status-dot"></span>
-              <span id="subbox-mode-text" data-i18n="cards.feed_online">In linea (Rete AC)</span>
+              <span id="subbox-mode-text" data-i18n="cards.feed_online">In linea (Rete elettrica)</span>
             </div>
           </div>
         </div>
@@ -1179,7 +1179,7 @@
               <div class="status-content">
                 <div class="status-row">
                   <span class="status-label" data-i18n="tab_status.field_feed">Alimentazione</span>
-                  <span id="stat-val-mode" class="status-value">In linea (Rete AC)</span>
+                  <span id="stat-val-mode" class="status-value">In linea (Rete elettrica)</span>
                 </div>
                 <div class="status-row">
                   <span class="status-label" data-i18n="tab_status.field_model">Modello Rilevato</span>
@@ -1362,6 +1362,50 @@
 
   <script>
     // ==========================================
+    // SELECTION-SAFE DOM HELPERS
+    // (Prevents periodic polling from disrupting active user text selection)
+    // ==========================================
+    function isNodeSelected(node) {
+      if (!node) return false;
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || sel.rangeCount === 0) return false;
+      try {
+        const range = sel.getRangeAt(0);
+        if (typeof range.intersectsNode === 'function') {
+          return range.intersectsNode(node);
+        }
+      } catch (e) {
+        // Fallback for exceptional nodes
+      }
+      return false;
+    }
+
+    function safeSetText(elOrId, text) {
+      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+      if (!el) return;
+      const str = String(text ?? '');
+      if (el.textContent === str) return; // Do not touch DOM node if identical
+      if (isNodeSelected(el)) return;     // Do not interrupt active text selection
+      el.textContent = str;
+    }
+
+    function safeSetClass(elOrId, className) {
+      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+      if (!el) return;
+      if (el.className !== className) {
+        el.className = className;
+      }
+    }
+
+    function safeSetStyle(elOrId, prop, value) {
+      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+      if (!el) return;
+      if (el.style[prop] !== value) {
+        el.style[prop] = value;
+      }
+    }
+
+    // ==========================================
     // 1. I18N (INTERNATIONALIZATION) MODULE
     // ==========================================
     let currentLangSetting = localStorage.getItem('ups_language') || 'auto';
@@ -1409,7 +1453,7 @@
 
     // Translate UPS status code(s)
     function translateUpsStatus(rawStatus) {
-      if (!rawStatus) return t('cards.feed_online', 'In linea (Rete AC)');
+      if (!rawStatus) return t('cards.feed_online', 'In linea (Rete elettrica)');
       const curMap = loadedLocales[activeLangCode]?.ups_status_map || {};
       const enMap = loadedLocales['en']?.ups_status_map || {};
       const map = Object.assign({}, enMap, curMap);
@@ -1612,7 +1656,7 @@
       
       // Update Version
       if (data.version) {
-        document.getElementById('badge-version').innerText = 'v' + data.version;
+        safeSetText('badge-version', 'v' + data.version);
       }
 
       // Connection Status & UPS State
@@ -1623,48 +1667,42 @@
       // Target NUT info
       if (data.nut_host && data.nut_port) {
         const ups = data.ups_name ? ` (${data.ups_name})` : '';
-        document.getElementById('info-target-server').innerText = `${t('subbar.target_nut', 'Target NUT')}: ${data.nut_host}:${data.nut_port}${ups}`;
+        safeSetText('info-target-server', `${t('subbar.target_nut', 'Target NUT')}: ${data.nut_host}:${data.nut_port}${ups}`);
       }
 
       const subStatus = document.getElementById('info-ups-status');
 
       if (!isOnline) {
-        dot.className = 'status-dot offline';
-        connText.className = 'status-text offline';
-        connText.innerText = t('topbar.status_offline', 'Offline');
+        safeSetClass(dot, 'status-dot offline');
+        safeSetClass(connText, 'status-text offline');
+        safeSetText(connText, t('topbar.status_offline', 'Offline'));
         if (subStatus) {
-          subStatus.innerText = t('subbar.server_unreachable', '• Server non raggiungibile');
-          subStatus.style.color = '#ef4444';
+          safeSetText(subStatus, t('subbar.server_unreachable', '• Server non raggiungibile'));
+          safeSetStyle(subStatus, 'color', '#ef4444');
         }
-        document.getElementById('last-update-time').innerText = data.error_message ? (t('subbar.error_prefix', 'Errore: ') + data.error_message) : t('subbar.nut_unreachable', 'Server NUT non raggiungibile');
-        const voltEl = document.getElementById('subbox-voltage-val');
-        if (voltEl) voltEl.innerText = '-- V';
-        const modeCont = document.getElementById('subbox-mode-container');
-        const modeDot = document.getElementById('subbox-mode-dot');
-        const modeText = document.getElementById('subbox-mode-text');
-        if (modeCont && modeText) {
-          modeCont.className = 'subbox-badge offline';
-          modeText.innerText = t('cards.feed_disconnected', 'Disconnesso');
-          if (modeDot) modeDot.className = 'status-dot offline';
-        }
+        safeSetText('last-update-time', data.error_message ? (t('subbar.error_prefix', 'Errore: ') + data.error_message) : t('subbar.nut_unreachable', 'Server NUT non raggiungibile'));
+        safeSetText('subbox-voltage-val', '-- V');
+        safeSetClass('subbox-mode-container', 'subbox-badge offline');
+        safeSetText('subbox-mode-text', t('cards.feed_disconnected', 'Disconnesso'));
+        safeSetClass('subbox-mode-dot', 'status-dot offline');
         return;
       }
 
       const displayUpsStatus = translateUpsStatus(data.ups_status_raw || data.ups_status || (isBattery ? 'OB' : 'OL'));
 
       if (isBattery) {
-        dot.className = 'status-dot warning';
-        connText.className = 'status-text warning';
-        connText.innerText = t('topbar.status_battery', 'Su Batteria (OB)');
+        safeSetClass(dot, 'status-dot warning');
+        safeSetClass(connText, 'status-text warning');
+        safeSetText(connText, t('topbar.status_battery', 'Su Batteria (OB)'));
       } else {
-        dot.className = 'status-dot';
-        connText.className = 'status-text';
-        connText.innerText = t('topbar.status_online', 'Online');
+        safeSetClass(dot, 'status-dot');
+        safeSetClass(connText, 'status-text');
+        safeSetText(connText, t('topbar.status_online', 'Online'));
       }
 
       if (subStatus) {
-        subStatus.innerText = `• ${displayUpsStatus}`;
-        subStatus.style.color = isBattery ? '#f59e0b' : '#38bdf8';
+        safeSetText(subStatus, `• ${displayUpsStatus}`);
+        safeSetStyle(subStatus, 'color', isBattery ? '#f59e0b' : '#38bdf8');
       }
 
       // Watts
@@ -1675,115 +1713,111 @@
       const powerViewGauge = document.getElementById('power-view-gauge');
 
       if (hasWatts) {
-        titlePower.innerText = t('cards.power_title_watts', 'Consumo & Carico');
-        wrapWattsBars.style.display = 'block';
-        wrapWattsGauge.style.display = 'block';
-        powerViewGauge.style.justifyContent = 'space-between';
-        document.getElementById('val-watts-bars').innerText = data.watts;
-        document.getElementById('val-watts-gauge').innerText = data.watts;
+        safeSetText(titlePower, t('cards.power_title_watts', 'Consumo & Carico'));
+        safeSetStyle(wrapWattsBars, 'display', 'block');
+        safeSetStyle(wrapWattsGauge, 'display', 'block');
+        safeSetStyle(powerViewGauge, 'justifyContent', 'space-between');
+        safeSetText('val-watts-bars', data.watts);
+        safeSetText('val-watts-gauge', data.watts);
       } else {
-        titlePower.innerText = t('cards.power_title_load', 'Carico UPS');
-        wrapWattsBars.style.display = 'none';
-        wrapWattsGauge.style.display = 'none';
-        powerViewGauge.style.justifyContent = 'center';
+        safeSetText(titlePower, t('cards.power_title_load', 'Carico UPS'));
+        safeSetStyle(wrapWattsBars, 'display', 'none');
+        safeSetStyle(wrapWattsGauge, 'display', 'none');
+        safeSetStyle(powerViewGauge, 'justifyContent', 'center');
       }
 
       // Load %
       const load = Math.min(100, Math.max(0, data.load || 0));
-      document.getElementById('pct-load-bars').innerText = load + '%';
-      document.getElementById('pct-load-gauge').innerText = load + '%';
+      safeSetText('pct-load-bars', load + '%');
+      safeSetText('pct-load-gauge', load + '%');
 
       const barLoad = document.getElementById('bar-load-fill');
-      barLoad.style.width = load + '%';
+      if (barLoad) safeSetStyle(barLoad, 'width', load + '%');
 
       const arcLoad = document.getElementById('arc-load');
       const offsetLoad = 110 - (110 * (load / 100));
-      arcLoad.style.strokeDashoffset = offsetLoad;
+      if (arcLoad && arcLoad.style.strokeDashoffset != offsetLoad) {
+        arcLoad.style.strokeDashoffset = offsetLoad;
+      }
 
       const loadStatus = document.getElementById('label-load-status');
       if (load > 85) {
-        loadStatus.innerText = t('cards.load_overload', 'Sovraccarico');
-        loadStatus.style.color = '#ef4444';
-        barLoad.style.background = '#ef4444';
-        arcLoad.style.stroke = '#ef4444';
+        safeSetText(loadStatus, t('cards.load_overload', 'Sovraccarico'));
+        safeSetStyle(loadStatus, 'color', '#ef4444');
+        if (barLoad) safeSetStyle(barLoad, 'background', '#ef4444');
+        if (arcLoad) safeSetStyle(arcLoad, 'stroke', '#ef4444');
       } else if (load > 60) {
-        loadStatus.innerText = t('cards.load_high', 'Elevato');
-        loadStatus.style.color = '#f59e0b';
-        barLoad.style.background = '#f59e0b';
-        arcLoad.style.stroke = '#f59e0b';
+        safeSetText(loadStatus, t('cards.load_high', 'Elevato'));
+        safeSetStyle(loadStatus, 'color', '#f59e0b');
+        if (barLoad) safeSetStyle(barLoad, 'background', '#f59e0b');
+        if (arcLoad) safeSetStyle(arcLoad, 'stroke', '#f59e0b');
       } else {
-        loadStatus.innerText = t('cards.load_normal', 'Normale');
-        loadStatus.style.color = '#38bdf8';
-        barLoad.style.background = 'linear-gradient(90deg, #0284c7, #38bdf8)';
-        arcLoad.style.stroke = '#38bdf8';
+        safeSetText(loadStatus, t('cards.load_normal', 'Normale'));
+        safeSetStyle(loadStatus, 'color', '#38bdf8');
+        if (barLoad) safeSetStyle(barLoad, 'background', 'linear-gradient(90deg, #0284c7, #38bdf8)');
+        if (arcLoad) safeSetStyle(arcLoad, 'stroke', '#38bdf8');
       }
 
       // Battery %
       const batt = Math.min(100, Math.max(0, data.battery || 0));
-      document.getElementById('val-batt-bars').innerText = batt;
-      document.getElementById('val-batt-gauge').innerText = batt;
-      document.getElementById('pct-batt-bars').innerText = batt + '%';
-      document.getElementById('pct-batt-gauge').innerText = batt + '%';
+      safeSetText('val-batt-bars', batt);
+      safeSetText('val-batt-gauge', batt);
+      safeSetText('pct-batt-bars', batt + '%');
+      safeSetText('pct-batt-gauge', batt + '%');
 
       const barBatt = document.getElementById('bar-batt-fill');
-      barBatt.style.width = batt + '%';
+      if (barBatt) safeSetStyle(barBatt, 'width', batt + '%');
 
       const arcBatt = document.getElementById('arc-batt');
       const offsetBatt = 110 - (110 * (batt / 100));
-      arcBatt.style.strokeDashoffset = offsetBatt;
+      if (arcBatt && arcBatt.style.strokeDashoffset != offsetBatt) {
+        arcBatt.style.strokeDashoffset = offsetBatt;
+      }
 
       const battStatus = document.getElementById('label-batt-status');
       if (batt <= 20) {
-        battStatus.innerText = t('cards.battery_critical', 'Critica');
-        battStatus.style.color = '#ef4444';
-        barBatt.style.background = '#ef4444';
-        arcBatt.style.stroke = '#ef4444';
+        safeSetText(battStatus, t('cards.battery_critical', 'Critica'));
+        safeSetStyle(battStatus, 'color', '#ef4444');
+        if (barBatt) safeSetStyle(barBatt, 'background', '#ef4444');
+        if (arcBatt) safeSetStyle(arcBatt, 'stroke', '#ef4444');
       } else if (batt <= 50) {
-        battStatus.innerText = t('cards.battery_medium', 'Media');
-        battStatus.style.color = '#f59e0b';
-        barBatt.style.background = '#f59e0b';
-        arcBatt.style.stroke = '#f59e0b';
+        safeSetText(battStatus, t('cards.battery_medium', 'Media'));
+        safeSetStyle(battStatus, 'color', '#f59e0b');
+        if (barBatt) safeSetStyle(barBatt, 'background', '#f59e0b');
+        if (arcBatt) safeSetStyle(arcBatt, 'stroke', '#f59e0b');
       } else {
-        battStatus.innerText = t('cards.battery_charged', 'Carica');
-        battStatus.style.color = '#34d399';
-        barBatt.style.background = 'linear-gradient(90deg, #059669, #34d399)';
-        arcBatt.style.stroke = '#34d399';
+        safeSetText(battStatus, t('cards.battery_charged', 'Carica'));
+        safeSetStyle(battStatus, 'color', '#34d399');
+        if (barBatt) safeSetStyle(barBatt, 'background', 'linear-gradient(90deg, #059669, #34d399)');
+        if (arcBatt) safeSetStyle(arcBatt, 'stroke', '#34d399');
       }
 
       // Valore tensione nel box sotto l'utilizzo
-      const voltValEl = document.getElementById('subbox-voltage-val');
-      if (voltValEl) {
-        if (isOnline && data.voltage !== null && data.voltage !== undefined) {
-          const vNum = Number(data.voltage);
-          voltValEl.innerText = (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V';
-        } else {
-          voltValEl.innerText = isOnline ? '-- V' : '--';
-        }
+      if (isOnline && data.voltage !== null && data.voltage !== undefined) {
+        const vNum = Number(data.voltage);
+        safeSetText('subbox-voltage-val', (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V');
+      } else {
+        safeSetText('subbox-voltage-val', isOnline ? '-- V' : '--');
       }
 
       // Stato alimentazione nel box sotto la percentuale di batteria
-      const modeContainer = document.getElementById('subbox-mode-container');
-      const modeDot = document.getElementById('subbox-mode-dot');
-      const modeText = document.getElementById('subbox-mode-text');
-      if (modeContainer && modeText) {
-        if (isBattery) {
-          modeContainer.className = 'subbox-badge battery';
-          modeText.innerText = displayUpsStatus || t('cards.feed_battery', 'Su Batteria (OB)');
-          if (modeDot) modeDot.className = 'status-dot warning';
-        } else {
-          modeContainer.className = 'subbox-badge online';
-          modeText.innerText = displayUpsStatus || t('cards.feed_online', 'In linea (Rete AC)');
-          if (modeDot) modeDot.className = 'status-dot';
-        }
+      if (isBattery) {
+        safeSetClass('subbox-mode-container', 'subbox-badge battery');
+        safeSetText('subbox-mode-text', displayUpsStatus || t('cards.feed_battery', 'Su Batteria (OB)'));
+        safeSetClass('subbox-mode-dot', 'status-dot warning');
+      } else {
+        safeSetClass('subbox-mode-container', 'subbox-badge online');
+        safeSetText('subbox-mode-text', displayUpsStatus || t('cards.feed_online', 'In linea (Rete elettrica)'));
+        safeSetClass('subbox-mode-dot', 'status-dot');
       }
 
       // Timestamp
       const now = new Date();
-      document.getElementById('last-update-time').innerText = t('subbar.last_update', 'Ultimo aggiornamento: ') + now.toLocaleTimeString();
+      safeSetText('last-update-time', t('subbar.last_update', 'Ultimo aggiornamento: ') + now.toLocaleTimeString());
 
       // Show Lock button if server requires password
       if (data.auth_required) {
-        document.getElementById('btn-lock').style.display = 'flex';
+        safeSetStyle('btn-lock', 'display', 'flex');
       }
     }
 
@@ -1881,20 +1915,20 @@
 
       const pillConn = document.getElementById('stat-pill-conn');
       if (pillConn) {
-        pillConn.className = isOnline ? 'status-pill online' : 'status-pill offline';
-        pillConn.innerText = isOnline ? t('tab_status.conn_online', 'ONLINE') : t('tab_status.conn_offline', 'OFFLINE');
+        safeSetClass(pillConn, isOnline ? 'status-pill online' : 'status-pill offline');
+        safeSetText(pillConn, isOnline ? t('tab_status.conn_online', 'ONLINE') : t('tab_status.conn_offline', 'OFFLINE'));
       }
-      document.getElementById('stat-val-target').innerText = `${cfg.nut_host}:${cfg.nut_port}`;
-      document.getElementById('stat-val-ups').innerText = cfg.ups_name || 'ups';
+      safeSetText('stat-val-target', `${cfg.nut_host}:${cfg.nut_port}`);
+      safeSetText('stat-val-ups', cfg.ups_name || 'ups');
       
       const syncTime = cfg.last_update ? new Date(cfg.last_update * 1000).toLocaleTimeString() : t('tab_status.waiting', 'In attesa...');
-      document.getElementById('stat-val-sync').innerText = syncTime;
+      safeSetText('stat-val-sync', syncTime);
 
       const errBox = document.getElementById('stat-box-error');
       if (errBox) {
         if (!isOnline && cfg.error_message) {
           errBox.style.display = 'flex';
-          document.getElementById('stat-msg-error').innerText = cfg.error_message;
+          safeSetText('stat-msg-error', cfg.error_message);
         } else {
           errBox.style.display = 'none';
         }
@@ -1903,38 +1937,32 @@
       const pillMode = document.getElementById('stat-pill-mode');
       if (pillMode) {
         if (!isOnline) {
-          pillMode.className = 'status-pill offline';
-          pillMode.innerText = t('tab_status.status_offline', 'OFFLINE');
+          safeSetClass(pillMode, 'status-pill offline');
+          safeSetText(pillMode, t('tab_status.status_offline', 'OFFLINE'));
         } else if (isBattery) {
-          pillMode.className = 'status-pill warning';
-          pillMode.innerText = t('tab_status.status_battery', 'SU BATTERIA (OB)');
+          safeSetClass(pillMode, 'status-pill warning');
+          safeSetText(pillMode, t('tab_status.status_battery', 'SU BATTERIA (OB)'));
         } else {
-          pillMode.className = 'status-pill online';
-          pillMode.innerText = t('tab_status.status_online', 'IN LINEA (OL)');
+          safeSetClass(pillMode, 'status-pill online');
+          safeSetText(pillMode, t('tab_status.status_online', 'IN LINEA (OL)'));
         }
       }
 
       const displayUpsStatus = translateUpsStatus(cfg.ups_status_raw || cfg.ups_status || (isBattery ? 'OB' : 'OL'));
-      document.getElementById('stat-val-mode').innerText = isOnline ? displayUpsStatus : t('subbar.nut_unreachable', 'Server NUT non raggiungibile');
-      document.getElementById('stat-val-model').innerText = cfg.ups_model || t('tab_status.model_generic', 'Non rilevato o generico');
+      safeSetText('stat-val-mode', isOnline ? displayUpsStatus : t('subbar.nut_unreachable', 'Server NUT non raggiungibile'));
+      safeSetText('stat-val-model', cfg.ups_model || t('tab_status.model_generic', 'Non rilevato o generico'));
       
       const metricsTpl = t('tab_status.metrics_unit', '{load}% carico • {batt}% batteria');
       const metricsStr = isOnline ? metricsTpl.replace('{load}', cfg.load || 0).replace('{batt}', cfg.battery || 0) : '--';
-      document.getElementById('stat-val-metrics').innerText = metricsStr;
+      safeSetText('stat-val-metrics', metricsStr);
 
-      const statPoll = document.getElementById('stat-val-poll');
-      if (statPoll) {
-        statPoll.innerText = `${pollSec}s`;
-      }
+      safeSetText('stat-val-poll', `${pollSec}s`);
 
-      const statVolt = document.getElementById('stat-val-voltage');
-      if (statVolt) {
-        if (isOnline && cfg.voltage !== null && cfg.voltage !== undefined) {
-          const vNum = Number(cfg.voltage);
-          statVolt.innerText = (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V';
-        } else {
-          statVolt.innerText = isOnline ? '-- V' : '--';
-        }
+      if (isOnline && cfg.voltage !== null && cfg.voltage !== undefined) {
+        const vNum = Number(cfg.voltage);
+        safeSetText('stat-val-voltage', (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V');
+      } else {
+        safeSetText('stat-val-voltage', isOnline ? '-- V' : '--');
       }
 
       // Server NUT tab banner

@@ -26,7 +26,7 @@
     "battery_medium": "Medium",
     "battery_critical": "Critical",
     "power_feed_label": "Power Source",
-    "feed_online": "Online (AC Mains)",
+    "feed_online": "Online (Utility Power)",
     "feed_battery": "On Battery (OB)",
     "feed_disconnected": "Disconnected"
   },
@@ -131,7 +131,7 @@
     "alert_load_fail": "Unable to load settings: "
   },
   "ups_status_map": {
-    "OL": "Online (AC Mains)",
+    "OL": "Online (Utility Power)",
     "OB": "On Battery (OB)",
     "LB": "Low Battery (LB)",
     "HB": "High Battery (HB)",
