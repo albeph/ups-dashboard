@@ -1724,8 +1724,8 @@
 
       const arcLoad = document.getElementById('arc-load');
       const offsetLoad = 110 - (110 * (load / 100));
-      if (arcLoad && arcLoad.style.strokeDashoffset != offsetLoad) {
-        arcLoad.style.strokeDashoffset = offsetLoad;
+      if (arcLoad) {
+        arcLoad.style.strokeDashoffset = String(offsetLoad);
       }
 
       const loadStatus = document.getElementById('label-load-status');
@@ -1758,8 +1758,8 @@
 
       const arcBatt = document.getElementById('arc-batt');
       const offsetBatt = 110 - (110 * (batt / 100));
-      if (arcBatt && arcBatt.style.strokeDashoffset != offsetBatt) {
-        arcBatt.style.strokeDashoffset = offsetBatt;
+      if (arcBatt) {
+        arcBatt.style.strokeDashoffset = String(offsetBatt);
       }
 
       const battStatus = document.getElementById('label-batt-status');
