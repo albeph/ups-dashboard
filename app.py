@@ -331,7 +331,11 @@ class NUTDataCache:
                 "error_message": self.error_message,
                 "auth_required": config.is_auth_required(),
                 "version": APP_VERSION,
+                "nut_host": config.get("nut_host"),
+                "nut_port": config.get("nut_port"),
+                "ups_name": config.get("ups_name"),
             }
+
 
 
 cache = NUTDataCache()

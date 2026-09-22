@@ -671,7 +671,7 @@
       <!-- SUB-BAR METADATA -->
       <div class="sub-bar">
         <div>
-          <span id="info-target-server">Target NUT: 127.0.0.1:3493</span>
+          <span id="info-target-server">Target NUT: --</span>
         </div>
         <div id="last-update-time">In attesa dati...</div>
       </div>
@@ -791,6 +791,12 @@
       dot.className = isOnline ? 'status-dot' : 'status-dot offline';
       connText.className = isOnline ? 'status-text' : 'status-text offline';
       connText.innerText = isOnline ? 'Online' : 'Offline';
+
+      // Target NUT info
+      if (data.nut_host && data.nut_port) {
+        const ups = data.ups_name ? ` (${data.ups_name})` : '';
+        document.getElementById('info-target-server').innerText = `Target NUT: ${data.nut_host}:${data.nut_port}${ups}`;
+      }
 
       if (!isOnline) {
         document.getElementById('last-update-time').innerText = data.error_message ? 'Errore: ' + data.error_message : 'Server NUT non raggiungibile';
