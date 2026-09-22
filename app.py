@@ -582,7 +582,31 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_json({"status": "ok", "version": APP_VERSION})
             return
 
-        # 5. Serve Frontend (index.html)
+        # 5. API: Available locales
+        if path == "/api/locales":
+            locales_dir = os.path.join(BASE_DIR, "static", "locales")
+            available = []
+            if os.path.isdir(locales_dir):
+                for fname in sorted(os.listdir(locales_dir)):
+                    if fname.endswith(".json"):
+                        code = fname[:-5]
+                        file_path = os.path.join(locales_dir, fname)
+                        try:
+                            with open(file_path, "r", encoding="utf-8") as lf:
+                                data = json.load(lf)
+                                meta = data.get("_meta", {})
+                                available.append({
+                                    "code": meta.get("code", code),
+                                    "name": meta.get("name", code.upper()),
+                                    "flag": meta.get("flag", "🌐")
+                                })
+                        except Exception as e:
+                            logger.warning(f"Error loading locale {fname}: {e}")
+                            available.append({"code": code, "name": code.upper(), "flag": "🌐"})
+            self.send_json({"locales": available, "default": "en"})
+            return
+
+        # 6. Serve Frontend (index.html)
         if path == "/" or path == "/index.html":
             index_path = os.path.join(BASE_DIR, "static", "index.html")
             try:
@@ -599,17 +623,21 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self.send_error(404, "File Not Found")
                 return
 
-        # 6. Serve static files
+        # 7. Serve static files
         static_dir = os.path.join(BASE_DIR, "static")
         safe_path = os.path.normpath(os.path.join(static_dir, path.lstrip("/")))
         if safe_path.startswith(static_dir) and os.path.isfile(safe_path):
-            content_type = "text/plain"
+            content_type = "text/plain; charset=utf-8"
             if safe_path.endswith(".css"):
-                content_type = "text/css"
+                content_type = "text/css; charset=utf-8"
             elif safe_path.endswith(".js"):
-                content_type = "application/javascript"
+                content_type = "application/javascript; charset=utf-8"
             elif safe_path.endswith(".svg"):
                 content_type = "image/svg+xml"
+            elif safe_path.endswith(".json"):
+                content_type = "application/json; charset=utf-8"
+            elif safe_path.endswith(".md"):
+                content_type = "text/markdown; charset=utf-8"
 
             with open(safe_path, "rb") as f:
                 content = f.read()

@@ -833,6 +833,16 @@
       border-color: #38bdf8;
     }
 
+    select.form-input {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
     .modal-actions {
       display: flex;
       justify-content: flex-end;
@@ -919,32 +929,32 @@
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
         </svg>
       </div>
-      <span class="brand-title">UPS Dashboard</span>
+      <span class="brand-title" data-i18n="topbar.brand_title">UPS Dashboard</span>
       <span id="badge-version" class="version-badge">v1.0.0</span>
 
       <div class="status-group">
         <div id="conn-dot" class="status-dot"></div>
-        <span id="conn-text" class="status-text">Online</span>
+        <span id="conn-text" class="status-text" data-i18n="topbar.status_online">Online</span>
       </div>
     </div>
 
     <div class="top-actions">
       <!-- SETTINGS BUTTON -->
-      <button class="action-btn" onclick="openSettingsModal()" title="Impostazioni Server NUT e Dashboard">
+      <button class="action-btn" onclick="openSettingsModal()" data-i18n-title="topbar.btn_settings_title" title="Impostazioni Server NUT e Dashboard">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
-        <span>Impostazioni</span>
+        <span data-i18n="topbar.btn_settings">Impostazioni</span>
       </button>
 
       <!-- LOCK / LOGOUT BUTTON -->
-      <button id="btn-lock" class="action-btn btn-lock" onclick="doLogout()" title="Blocca sessione">
+      <button id="btn-lock" class="action-btn btn-lock" onclick="doLogout()" data-i18n-title="topbar.btn_lock_title" title="Blocca sessione">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
-        <span>Lock</span>
+        <span data-i18n="topbar.btn_lock">Lock</span>
       </button>
     </div>
   </header>
@@ -958,8 +968,8 @@
         <!-- CARD 1: CONSUMO & CARICO -->
         <div class="card">
           <div class="card-header">
-            <span id="title-card-power">Consumo & Carico</span>
-            <span id="label-load-status" style="color: #38bdf8;">Normale</span>
+            <span id="title-card-power" data-i18n="cards.power_title_watts">Consumo & Carico</span>
+            <span id="label-load-status" style="color: #38bdf8;" data-i18n="cards.load_normal">Normale</span>
           </div>
 
           <!-- Mode A: Progress Bar -->
@@ -997,7 +1007,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
               </svg>
-              <span>Tensione</span>
+              <span data-i18n="cards.voltage_label">Tensione</span>
             </div>
             <div id="subbox-voltage-val" class="subbox-badge voltage">-- V</div>
           </div>
@@ -1006,8 +1016,8 @@
         <!-- CARD 2: STATO BATTERIA -->
         <div class="card">
           <div class="card-header">
-            <span>Stato Batteria</span>
-            <span id="label-batt-status" style="color: #34d399;">Carica</span>
+            <span data-i18n="cards.battery_title">Stato Batteria</span>
+            <span id="label-batt-status" style="color: #34d399;" data-i18n="cards.battery_charged">Carica</span>
           </div>
 
           <!-- Mode A: Progress Bar -->
@@ -1046,11 +1056,11 @@
                 <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
                 <line x1="12" y1="2" x2="12" y2="12"></line>
               </svg>
-              <span>Alimentazione</span>
+              <span data-i18n="cards.power_feed_label">Alimentazione</span>
             </div>
             <div id="subbox-mode-container" class="subbox-badge online">
               <span id="subbox-mode-dot" class="status-dot"></span>
-              <span id="subbox-mode-text">In linea (Rete AC)</span>
+              <span id="subbox-mode-text" data-i18n="cards.feed_online">In linea (Rete AC)</span>
             </div>
           </div>
         </div>
@@ -1063,7 +1073,7 @@
           <span id="info-target-server">Target NUT: --</span>
           <span id="info-ups-status" style="margin-left: 8px; color: #38bdf8;"></span>
         </div>
-        <div id="last-update-time">In attesa dati...</div>
+        <div id="last-update-time" data-i18n="subbar.waiting_data">In attesa dati...</div>
       </div>
 
     </div>
@@ -1073,7 +1083,7 @@
   <div id="settings-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">Impostazioni Dashboard</h3>
+        <h3 class="modal-title" data-i18n="modal.title">Impostazioni Dashboard</h3>
         <button class="close-btn" onclick="closeSettingsModal()">&times;</button>
       </div>
 
@@ -1083,7 +1093,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
           </svg>
-          <span>Stato</span>
+          <span data-i18n="modal.tab_status">Stato</span>
         </button>
         <button type="button" id="tab-btn-nut" class="modal-tab-btn" onclick="switchSettingsTab('nut')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1092,7 +1102,7 @@
             <line x1="6" y1="6" x2="6.01" y2="6"></line>
             <line x1="6" y1="18" x2="6.01" y2="18"></line>
           </svg>
-          <span>Server NUT</span>
+          <span data-i18n="modal.tab_nut">Server NUT</span>
         </button>
         <button type="button" id="tab-btn-appearance" class="modal-tab-btn" onclick="switchSettingsTab('appearance')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1100,14 +1110,14 @@
             <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10"></path>
             <path d="M12 6v6l4 2"></path>
           </svg>
-          <span>Aspetto</span>
+          <span data-i18n="modal.tab_appearance">Aspetto</span>
         </button>
         <button type="button" id="tab-btn-security" class="modal-tab-btn" onclick="switchSettingsTab('security')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
-          <span>Sicurezza</span>
+          <span data-i18n="modal.tab_security">Sicurezza</span>
         </button>
       </div>
 
@@ -1120,20 +1130,20 @@
             <!-- Connessione Server NUT -->
             <div class="status-card">
               <div class="status-header">
-                <span class="status-title">Connessione Server NUT</span>
+                <span class="status-title" data-i18n="tab_status.card_conn_title">Connessione Server NUT</span>
                 <span id="stat-pill-conn" class="status-pill online">ONLINE</span>
               </div>
               <div class="status-content">
                 <div class="status-row">
-                  <span class="status-label">Host & Porta</span>
+                  <span class="status-label" data-i18n="tab_status.field_host_port">Host & Porta</span>
                   <span id="stat-val-target" class="status-value">--</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label">Identificativo UPS</span>
+                  <span class="status-label" data-i18n="tab_status.field_ups_id">Identificativo UPS</span>
                   <span id="stat-val-ups" class="status-value">--</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label">Ultimo Sync</span>
+                  <span class="status-label" data-i18n="tab_status.field_last_sync">Ultimo Sync</span>
                   <span id="stat-val-sync" class="status-value">--</span>
                 </div>
                 <div id="stat-box-error" class="status-error-box" style="display: none;">
@@ -1146,28 +1156,28 @@
             <!-- Stato Operativo Hardware UPS -->
             <div class="status-card">
               <div class="status-header">
-                <span class="status-title">Stato Operativo UPS</span>
+                <span class="status-title" data-i18n="tab_status.card_ups_title">Stato Operativo UPS</span>
                 <span id="stat-pill-mode" class="status-pill online">IN LINEA (OL)</span>
               </div>
               <div class="status-content">
                 <div class="status-row">
-                  <span class="status-label">Alimentazione</span>
+                  <span class="status-label" data-i18n="tab_status.field_feed">Alimentazione</span>
                   <span id="stat-val-mode" class="status-value">In linea (Rete AC)</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label">Modello Rilevato</span>
+                  <span class="status-label" data-i18n="tab_status.field_model">Modello Rilevato</span>
                   <span id="stat-val-model" class="status-value">--</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label">Carico / Batteria</span>
+                  <span class="status-label" data-i18n="tab_status.field_metrics">Carico / Batteria</span>
                   <span id="stat-val-metrics" class="status-value">-- % / -- %</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label">Frequenza Refresh</span>
+                  <span class="status-label" data-i18n="tab_status.field_refresh_rate">Frequenza Refresh</span>
                   <span id="stat-val-poll" class="status-value">2.0s</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label">Tensione di Rete</span>
+                  <span class="status-label" data-i18n="tab_status.field_voltage">Tensione di Rete</span>
                   <span id="stat-val-voltage" class="status-value">-- V</span>
                 </div>
               </div>
@@ -1179,51 +1189,51 @@
         <!-- TAB 1: SERVER NUT -->
         <div id="tab-pane-nut" class="tab-pane" style="display: none;">
           <div class="form-section">
-            <div class="section-label">Stato Connessione Attuale</div>
+            <div class="section-label" data-i18n="tab_nut.section_conn_status">Stato Connessione Attuale</div>
             <div id="nut-status-banner" class="security-status">
               <span id="nut-status-dot" class="status-dot"></span>
               <span id="nut-status-text">In attesa verifica...</span>
             </div>
           </div>
           <div class="form-section">
-            <div class="section-label">Parametri Connessione</div>
+            <div class="section-label" data-i18n="tab_nut.section_params">Parametri Connessione</div>
             <div class="form-row">
               <div class="form-group">
-                <label for="cfg-host">Host o IP</label>
-                <input id="cfg-host" class="form-input" placeholder="es. 192.168.1.50">
+                <label for="cfg-host" data-i18n="tab_nut.label_host">Host o IP</label>
+                <input id="cfg-host" class="form-input" data-i18n-ph="tab_nut.ph_host" placeholder="es. 192.168.1.50">
               </div>
               <div class="form-group">
-                <label for="cfg-port">Porta TCP</label>
+                <label for="cfg-port" data-i18n="tab_nut.label_port">Porta TCP</label>
                 <input id="cfg-port" type="number" class="form-input" placeholder="3493">
               </div>
             </div>
             <div class="form-group">
-              <label for="cfg-ups-name">Nome UPS</label>
-              <input id="cfg-ups-name" class="form-input" placeholder="ups">
+              <label for="cfg-ups-name" data-i18n="tab_nut.label_ups_name">Nome UPS</label>
+              <input id="cfg-ups-name" class="form-input" data-i18n-ph="tab_nut.ph_ups_name" placeholder="ups">
             </div>
           </div>
 
           <div class="form-section">
-            <div class="section-label">Credenziali Demone NUT (Opzionali)</div>
+            <div class="section-label" data-i18n="tab_nut.section_credentials">Credenziali Demone NUT (Opzionali)</div>
             <div class="form-row">
               <div class="form-group">
-                <label for="cfg-nut-user">Username NUT</label>
-                <input id="cfg-nut-user" class="form-input" placeholder="es. upsmon">
+                <label for="cfg-nut-user" data-i18n="tab_nut.label_nut_user">Username NUT</label>
+                <input id="cfg-nut-user" class="form-input" data-i18n-ph="tab_nut.ph_nut_user" placeholder="es. upsmon">
               </div>
               <div class="form-group">
-                <label for="cfg-nut-pwd">Password NUT</label>
+                <label for="cfg-nut-pwd" data-i18n="tab_nut.label_nut_pwd">Password NUT</label>
                 <input id="cfg-nut-pwd" type="password" class="form-input" placeholder="Lascia vuoto per non cambiare">
               </div>
             </div>
           </div>
 
           <div class="form-section">
-            <div class="section-label">Frequenza di Aggiornamento</div>
+            <div class="section-label" data-i18n="tab_nut.section_polling">Frequenza di Aggiornamento</div>
             <div class="form-group">
-              <label for="cfg-poll-interval">Intervallo Aggiornamento Dati</label>
+              <label for="cfg-poll-interval" data-i18n="tab_nut.label_polling">Intervallo Aggiornamento Dati</label>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <input id="cfg-poll-interval" type="number" step="0.5" min="0.5" max="60" class="form-input" style="width: 85px; text-align: center;" placeholder="2.0" oninput="setPollInterval(this.value, false)">
-                <span style="font-size: 13px; color: #9ca3af;">sec</span>
+                <span data-i18n="tab_nut.unit_sec" style="font-size: 13px; color: #9ca3af;">sec</span>
                 <div class="poll-presets">
                   <button type="button" class="preset-btn" onclick="setPollInterval(1, true)">1s</button>
                   <button type="button" class="preset-btn" onclick="setPollInterval(2, true)">2s</button>
@@ -1231,24 +1241,24 @@
                   <button type="button" class="preset-btn" onclick="setPollInterval(10, true)">10s</button>
                 </div>
               </div>
-              <span style="font-size: 12px; color: #6b7280; margin-top: 5px;">
+              <span data-i18n="tab_nut.desc_polling" style="font-size: 12px; color: #6b7280; margin-top: 5px;">
                 Intervallo in secondi tra le interrogazioni al server NUT e il refresh a video (predefinito: 2s).
               </span>
             </div>
           </div>
         </div>
 
-        <!-- TAB 2: ASPETTO (SEMICERCHIO O BARRA) -->
+        <!-- TAB 2: ASPETTO (SEMICERCHIO O BARRA & LINGUA) -->
         <div id="tab-pane-appearance" class="tab-pane" style="display: none;">
           <div class="form-section">
-            <div class="section-label">Stile Indicatori Telemetria</div>
+            <div class="section-label" data-i18n="tab_appearance.section_style">Stile Indicatori Telemetria</div>
             <div class="mode-options-grid">
               <div id="opt-mode-bars" class="mode-card active" onclick="selectSettingsMode('bars')">
                 <div class="mode-card-header">
                   <div class="mode-radio"></div>
-                  <span class="mode-title">Barre Orizzontali</span>
+                  <span class="mode-title" data-i18n="tab_appearance.mode_bars_title">Barre Orizzontali</span>
                 </div>
-                <div class="mode-desc">Visualizzazione lineare e compatta con barre di riempimento a gradiente dinamico.</div>
+                <div class="mode-desc" data-i18n="tab_appearance.mode_bars_desc">Visualizzazione lineare e compatta con barre di riempimento a gradiente dinamico.</div>
                 <div class="mode-preview-bar">
                   <div class="mode-preview-fill"></div>
                 </div>
@@ -1257,9 +1267,9 @@
               <div id="opt-mode-gauge" class="mode-card" onclick="selectSettingsMode('gauge')">
                 <div class="mode-card-header">
                   <div class="mode-radio"></div>
-                  <span class="mode-title">Semicerchio (Gauge)</span>
+                  <span class="mode-title" data-i18n="tab_appearance.mode_gauge_title">Semicerchio (Gauge)</span>
                 </div>
-                <div class="mode-desc">Cruscotto grafico con indicatori circolari ad arco SVG ispirati a strumenti analogici.</div>
+                <div class="mode-desc" data-i18n="tab_appearance.mode_gauge_desc">Cruscotto grafico con indicatori circolari ad arco SVG ispirati a strumenti analogici.</div>
                 <div class="mode-preview-gauge">
                   <svg width="56" height="32" viewBox="0 0 100 55">
                     <path class="gauge-bg" d="M 15 50 A 35 35 0 0 1 85 50" />
@@ -1268,8 +1278,23 @@
                 </div>
               </div>
             </div>
-            <div style="font-size: 12.5px; color: #6b7280; margin-top: 14px; text-align: center;">
+            <div style="font-size: 12.5px; color: #6b7280; margin-top: 14px; text-align: center;" data-i18n="tab_appearance.mode_note">
               La modalità scelta viene applicata immediatamente alla dashboard e memorizzata nel browser.
+            </div>
+          </div>
+
+          <!-- LINGUA DELL'INTERFACCIA -->
+          <div class="form-section">
+            <div class="section-label" data-i18n="tab_appearance.section_lang">Lingua dell'Interfaccia</div>
+            <div class="form-group">
+              <select id="cfg-language" class="form-input" onchange="handleLanguageChange(this.value)">
+                <option value="auto" data-i18n="tab_appearance.lang_auto">🌐 Automatica (Riconosciuta dal browser)</option>
+                <option value="it">🇮🇹 Italiano</option>
+                <option value="en">🇬🇧 English</option>
+              </select>
+              <span style="font-size: 12px; color: #6b7280; margin-top: 5px;" data-i18n="tab_appearance.lang_desc">
+                Seleziona la lingua preferita o usa l'impostazione automatica basata sul tuo browser.
+              </span>
             </div>
           </div>
         </div>
@@ -1277,16 +1302,16 @@
         <!-- TAB 3: SICUREZZA -->
         <div id="tab-pane-security" class="tab-pane" style="display: none;">
           <div class="form-section">
-            <div class="section-label">Stato Autenticazione Portale</div>
+            <div class="section-label" data-i18n="tab_security.section_auth_status">Stato Autenticazione Portale</div>
             <div id="security-status-badge" class="security-status"></div>
           </div>
 
           <div class="form-section">
-            <div class="section-label">Aggiorna Password Dashboard</div>
+            <div class="section-label" data-i18n="tab_security.section_update_pwd">Aggiorna Password Dashboard</div>
             <div class="form-group">
-              <label for="cfg-dash-pwd">Nuova Password Dashboard</label>
-              <input id="cfg-dash-pwd" type="password" class="form-input" placeholder="Lascia vuoto per mantenere l'attuale">
-              <span style="font-size: 12px; color: #6b7280; margin-top: 5px;">
+              <label for="cfg-dash-pwd" data-i18n="tab_security.label_new_pwd">Nuova Password Dashboard</label>
+              <input id="cfg-dash-pwd" type="password" class="form-input" data-i18n-ph="tab_security.ph_new_pwd" placeholder="Lascia vuoto per mantenere l'attuale">
+              <span style="font-size: 12px; color: #6b7280; margin-top: 5px;" data-i18n="tab_security.pwd_note">
                 Cifratura irreversibile con PBKDF2-HMAC-SHA256 (100.000 iterazioni crittografiche).
               </span>
             </div>
@@ -1296,8 +1321,8 @@
         <div id="settings-toast" class="toast-msg"></div>
 
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" onclick="closeSettingsModal()">Annulla</button>
-          <button type="submit" class="btn-save">Salva Modifiche</button>
+          <button type="button" class="btn-cancel" onclick="closeSettingsModal()" data-i18n="modal.btn_cancel">Annulla</button>
+          <button type="submit" class="btn-save" data-i18n="modal.btn_save">Salva Modifiche</button>
         </div>
 
       </form>
@@ -1308,18 +1333,199 @@
   <div id="lock-screen" class="lock-overlay">
     <div class="lock-card">
       <div style="font-size: 32px; margin-bottom: 10px;">🔒</div>
-      <div style="font-size: 19px; font-weight: 700; color: #f9fafb;">Accesso Protetto</div>
-      <div style="font-size: 13px; color: #9ca3af; margin-top: 6px; margin-bottom: 16px;">Inserisci la password per sbloccare la dashboard</div>
+      <div style="font-size: 19px; font-weight: 700; color: #f9fafb;" data-i18n="lock_screen.title">Accesso Protetto</div>
+      <div style="font-size: 13px; color: #9ca3af; margin-top: 6px; margin-bottom: 16px;" data-i18n="lock_screen.desc">Inserisci la password per sbloccare la dashboard</div>
       <form onsubmit="handleLogin(event)">
-        <input id="pwd-field" type="password" class="form-input" style="width: 100%; text-align: center; margin-bottom: 14px;" placeholder="Password..." autocomplete="current-password" required>
-        <button type="submit" class="btn-save" style="width: 100%; padding: 11px;">Accedi</button>
+        <input id="pwd-field" type="password" class="form-input" style="width: 100%; text-align: center; margin-bottom: 14px;" data-i18n-ph="lock_screen.ph_pwd" placeholder="Password..." autocomplete="current-password" required>
+        <button type="submit" class="btn-save" style="width: 100%; padding: 11px;" data-i18n="lock_screen.btn_login">Accedi</button>
       </form>
       <div id="login-error" style="color: #ef4444; font-size: 12.5px; margin-top: 10px; min-height: 18px;"></div>
     </div>
   </div>
 
   <script>
-    // Mode switcher with localStorage persistence
+    // ==========================================
+    // 1. I18N (INTERNATIONALIZATION) MODULE
+    // ==========================================
+    let currentLangSetting = localStorage.getItem('ups_language') || 'auto';
+    let activeLangCode = 'en';
+    let availableLocales = [
+      { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+      { code: 'en', name: 'English', flag: '🇬🇧' }
+    ];
+    let loadedLocales = {};
+    let lastStatsData = null;
+    let lastSettingsData = null;
+
+    // Detect browser language (ISO 639-1 code)
+    function getBrowserLanguage() {
+      const navLang = navigator.language || navigator.userLanguage || 'en';
+      return navLang.split('-')[0].toLowerCase();
+    }
+
+    // Traverse dot-separated paths in an object
+    function getKeyValue(obj, path) {
+      if (!obj || !path) return null;
+      const parts = path.split('.');
+      let cur = obj;
+      for (const p of parts) {
+        if (cur && typeof cur === 'object' && p in cur) {
+          cur = cur[p];
+        } else {
+          return null;
+        }
+      }
+      return typeof cur === 'string' ? cur : null;
+    }
+
+    // Translate string with fallback to English
+    function t(key, fallback = '') {
+      let val = null;
+      if (loadedLocales[activeLangCode]) {
+        val = getKeyValue(loadedLocales[activeLangCode], key);
+      }
+      if (val === null && loadedLocales['en']) {
+        val = getKeyValue(loadedLocales['en'], key);
+      }
+      return val !== null ? val : (fallback || key);
+    }
+
+    // Translate UPS status code(s)
+    function translateUpsStatus(rawStatus) {
+      if (!rawStatus) return t('cards.feed_online', 'In linea (Rete AC)');
+      const curMap = loadedLocales[activeLangCode]?.ups_status_map || {};
+      const enMap = loadedLocales['en']?.ups_status_map || {};
+      const map = Object.assign({}, enMap, curMap);
+      if (map[rawStatus]) return map[rawStatus];
+
+      const parts = rawStatus.split(/\s+/);
+      const translated = parts.map(p => map[p] || p);
+      return translated.join(' • ');
+    }
+
+    // Fetch and cache locale JSON
+    async function loadLocale(code) {
+      if (loadedLocales[code]) return loadedLocales[code];
+      try {
+        const res = await fetch('/locales/' + code + '.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        loadedLocales[code] = data;
+        return data;
+      } catch (err) {
+        console.warn('Could not load locale ' + code + ':', err);
+        return null;
+      }
+    }
+
+    // Apply translations to all data-i18n attributes
+    function applyTranslations() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const translated = t(key);
+        if (translated) el.innerText = translated;
+      });
+
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        const translated = t(key);
+        if (translated) el.placeholder = translated;
+      });
+
+      document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        const translated = t(key);
+        if (translated) el.title = translated;
+      });
+
+      document.documentElement.lang = activeLangCode;
+    }
+
+    // Switch and apply language
+    async function setLanguage(langCode, save = true) {
+      if (save) {
+        localStorage.setItem('ups_language', langCode);
+        currentLangSetting = langCode;
+      }
+
+      let targetCode = 'en';
+      if (langCode === 'auto') {
+        const bLang = getBrowserLanguage();
+        const found = availableLocales.some(l => l.code === bLang);
+        targetCode = found ? bLang : 'en';
+      } else {
+        targetCode = langCode;
+      }
+
+      activeLangCode = targetCode;
+
+      // Always load English for fallback
+      if (!loadedLocales['en']) {
+        await loadLocale('en');
+      }
+
+      // Load target if not loaded
+      if (activeLangCode !== 'en' && !loadedLocales[activeLangCode]) {
+        await loadLocale(activeLangCode);
+      }
+
+      const sel = document.getElementById('cfg-language');
+      if (sel) {
+        sel.value = currentLangSetting;
+      }
+
+      applyTranslations();
+
+      if (lastStatsData) {
+        updateUI(lastStatsData);
+      }
+      if (lastSettingsData && document.getElementById('settings-modal').classList.contains('active')) {
+        populateSettingsModal(lastSettingsData);
+      }
+    }
+
+    function handleLanguageChange(val) {
+      setLanguage(val, true);
+    }
+
+    async function initLocales() {
+      try {
+        const res = await fetch('/api/locales');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.locales) && data.locales.length > 0) {
+            availableLocales = data.locales;
+          }
+        }
+      } catch (e) {
+        console.warn('Using default locales list:', e);
+      }
+
+      const sel = document.getElementById('cfg-language');
+      if (sel) {
+        sel.innerHTML = '';
+        const autoOpt = document.createElement('option');
+        autoOpt.value = 'auto';
+        autoOpt.setAttribute('data-i18n', 'tab_appearance.lang_auto');
+        autoOpt.textContent = '🌐 Automatica (Riconosciuta dal browser)';
+        sel.appendChild(autoOpt);
+
+        availableLocales.forEach(loc => {
+          const opt = document.createElement('option');
+          opt.value = loc.code;
+          opt.textContent = `${loc.flag} ${loc.name}`;
+          sel.appendChild(opt);
+        });
+
+        sel.value = currentLangSetting;
+      }
+
+      await setLanguage(currentLangSetting, false);
+    }
+
+    // ==========================================
+    // 2. VIEW MODE & DISPLAY
+    // ==========================================
     let currentMode = localStorage.getItem('ups_view_mode') || 'bars';
     switchMode(currentMode, false);
 
@@ -1345,6 +1551,9 @@
       switchMode(mode, true);
     }
 
+    // ==========================================
+    // 3. POLLING & SETTINGS TABS
+    // ==========================================
     function setPollInterval(sec, updateInput = true) {
       const s = parseFloat(sec);
       if (updateInput && !isNaN(s)) {
@@ -1377,7 +1586,11 @@
       });
     }
 
+    // ==========================================
+    // 4. MAIN UI UPDATER
+    // ==========================================
     function updateUI(data) {
+      lastStatsData = data;
       const isOnline = data.status === 'online';
       
       // Update Version
@@ -1393,7 +1606,7 @@
       // Target NUT info
       if (data.nut_host && data.nut_port) {
         const ups = data.ups_name ? ` (${data.ups_name})` : '';
-        document.getElementById('info-target-server').innerText = `Target NUT: ${data.nut_host}:${data.nut_port}${ups}`;
+        document.getElementById('info-target-server').innerText = `${t('subbar.target_nut', 'Target NUT')}: ${data.nut_host}:${data.nut_port}${ups}`;
       }
 
       const subStatus = document.getElementById('info-ups-status');
@@ -1401,12 +1614,12 @@
       if (!isOnline) {
         dot.className = 'status-dot offline';
         connText.className = 'status-text offline';
-        connText.innerText = 'Offline';
+        connText.innerText = t('topbar.status_offline', 'Offline');
         if (subStatus) {
-          subStatus.innerText = '• Server non raggiungibile';
+          subStatus.innerText = t('subbar.server_unreachable', '• Server non raggiungibile');
           subStatus.style.color = '#ef4444';
         }
-        document.getElementById('last-update-time').innerText = data.error_message ? 'Errore: ' + data.error_message : 'Server NUT non raggiungibile';
+        document.getElementById('last-update-time').innerText = data.error_message ? (t('subbar.error_prefix', 'Errore: ') + data.error_message) : t('subbar.nut_unreachable', 'Server NUT non raggiungibile');
         const voltEl = document.getElementById('subbox-voltage-val');
         if (voltEl) voltEl.innerText = '-- V';
         const modeCont = document.getElementById('subbox-mode-container');
@@ -1414,28 +1627,30 @@
         const modeText = document.getElementById('subbox-mode-text');
         if (modeCont && modeText) {
           modeCont.className = 'subbox-badge offline';
-          modeText.innerText = 'Disconnesso';
+          modeText.innerText = t('cards.feed_disconnected', 'Disconnesso');
           if (modeDot) modeDot.className = 'status-dot offline';
         }
         return;
       }
 
+      const displayUpsStatus = translateUpsStatus(data.ups_status_raw || data.ups_status || (isBattery ? 'OB' : 'OL'));
+
       if (isBattery) {
         dot.className = 'status-dot warning';
         connText.className = 'status-text warning';
-        connText.innerText = 'Su Batteria (OB)';
+        connText.innerText = t('topbar.status_battery', 'Su Batteria (OB)');
       } else {
         dot.className = 'status-dot';
         connText.className = 'status-text';
-        connText.innerText = 'Online';
+        connText.innerText = t('topbar.status_online', 'Online');
       }
 
       if (subStatus) {
-        subStatus.innerText = data.ups_status ? `• ${data.ups_status}` : '';
+        subStatus.innerText = `• ${displayUpsStatus}`;
         subStatus.style.color = isBattery ? '#f59e0b' : '#38bdf8';
       }
 
-      // Watts: mostrati solo se rilevati automaticamente dall'UPS hardware
+      // Watts
       const hasWatts = data.watts !== null && data.watts !== undefined;
       const titlePower = document.getElementById('title-card-power');
       const wrapWattsBars = document.getElementById('wrapper-watts-bars');
@@ -1443,15 +1658,14 @@
       const powerViewGauge = document.getElementById('power-view-gauge');
 
       if (hasWatts) {
-        titlePower.innerText = 'Consumo & Carico';
+        titlePower.innerText = t('cards.power_title_watts', 'Consumo & Carico');
         wrapWattsBars.style.display = 'block';
         wrapWattsGauge.style.display = 'block';
         powerViewGauge.style.justifyContent = 'space-between';
         document.getElementById('val-watts-bars').innerText = data.watts;
         document.getElementById('val-watts-gauge').innerText = data.watts;
       } else {
-        // Se non rilevato automaticamente dall'UPS, non mostrare la statistica
-        titlePower.innerText = 'Carico UPS';
+        titlePower.innerText = t('cards.power_title_load', 'Carico UPS');
         wrapWattsBars.style.display = 'none';
         wrapWattsGauge.style.display = 'none';
         powerViewGauge.style.justifyContent = 'center';
@@ -1471,17 +1685,17 @@
 
       const loadStatus = document.getElementById('label-load-status');
       if (load > 85) {
-        loadStatus.innerText = 'Sovraccarico';
+        loadStatus.innerText = t('cards.load_overload', 'Sovraccarico');
         loadStatus.style.color = '#ef4444';
         barLoad.style.background = '#ef4444';
         arcLoad.style.stroke = '#ef4444';
       } else if (load > 60) {
-        loadStatus.innerText = 'Elevato';
+        loadStatus.innerText = t('cards.load_high', 'Elevato');
         loadStatus.style.color = '#f59e0b';
         barLoad.style.background = '#f59e0b';
         arcLoad.style.stroke = '#f59e0b';
       } else {
-        loadStatus.innerText = 'Normale';
+        loadStatus.innerText = t('cards.load_normal', 'Normale');
         loadStatus.style.color = '#38bdf8';
         barLoad.style.background = 'linear-gradient(90deg, #0284c7, #38bdf8)';
         arcLoad.style.stroke = '#38bdf8';
@@ -1503,17 +1717,17 @@
 
       const battStatus = document.getElementById('label-batt-status');
       if (batt <= 20) {
-        battStatus.innerText = 'Critica';
+        battStatus.innerText = t('cards.battery_critical', 'Critica');
         battStatus.style.color = '#ef4444';
         barBatt.style.background = '#ef4444';
         arcBatt.style.stroke = '#ef4444';
       } else if (batt <= 50) {
-        battStatus.innerText = 'Media';
+        battStatus.innerText = t('cards.battery_medium', 'Media');
         battStatus.style.color = '#f59e0b';
         barBatt.style.background = '#f59e0b';
         arcBatt.style.stroke = '#f59e0b';
       } else {
-        battStatus.innerText = 'Carica';
+        battStatus.innerText = t('cards.battery_charged', 'Carica');
         battStatus.style.color = '#34d399';
         barBatt.style.background = 'linear-gradient(90deg, #059669, #34d399)';
         arcBatt.style.stroke = '#34d399';
@@ -1537,18 +1751,18 @@
       if (modeContainer && modeText) {
         if (isBattery) {
           modeContainer.className = 'subbox-badge battery';
-          modeText.innerText = data.ups_status || 'Su Batteria (OB)';
+          modeText.innerText = displayUpsStatus || t('cards.feed_battery', 'Su Batteria (OB)');
           if (modeDot) modeDot.className = 'status-dot warning';
         } else {
           modeContainer.className = 'subbox-badge online';
-          modeText.innerText = data.ups_status || 'In linea (Rete AC)';
+          modeText.innerText = displayUpsStatus || t('cards.feed_online', 'In linea (Rete AC)');
           if (modeDot) modeDot.className = 'status-dot';
         }
       }
 
       // Timestamp
       const now = new Date();
-      document.getElementById('last-update-time').innerText = 'Ultimo aggiornamento: ' + now.toLocaleTimeString();
+      document.getElementById('last-update-time').innerText = t('subbar.last_update', 'Ultimo aggiornamento: ') + now.toLocaleTimeString();
 
       // Show Lock button if server requires password
       if (data.auth_required) {
@@ -1578,6 +1792,9 @@
       }
     }
 
+    // ==========================================
+    // 5. LOCK SCREEN & AUTH
+    // ==========================================
     function showLockScreen() {
       document.getElementById('lock-screen').classList.add('active');
       document.getElementById('btn-lock').style.display = 'none';
@@ -1607,10 +1824,10 @@
           hideLockScreen();
           fetchStats();
         } else {
-          errorDiv.innerText = data.error || 'Password errata';
+          errorDiv.innerText = data.error || t('lock_screen.err_wrong_pwd', 'Password errata');
         }
       } catch (err) {
-        errorDiv.innerText = 'Errore di connessione al server';
+        errorDiv.innerText = t('lock_screen.err_conn', 'Errore di connessione al server');
       }
     }
 
@@ -1621,7 +1838,142 @@
       showLockScreen();
     }
 
-    // SETTINGS MODAL LOGIC
+    // ==========================================
+    // 6. SETTINGS MODAL & FORM
+    // ==========================================
+    function populateSettingsModal(cfg) {
+      lastSettingsData = cfg;
+      document.getElementById('cfg-host').value = cfg.nut_host || '';
+      document.getElementById('cfg-port').value = cfg.nut_port || 3493;
+      document.getElementById('cfg-ups-name').value = cfg.ups_name || 'ups';
+      document.getElementById('cfg-nut-user').value = cfg.nut_user || '';
+      
+      const pollSec = cfg.poll_interval || 2.0;
+      setPollInterval(pollSec, true);
+
+      const nutPwdInput = document.getElementById('cfg-nut-pwd');
+      if (cfg.has_nut_password) {
+        nutPwdInput.placeholder = t('tab_nut.ph_nut_pwd_set', '•••••••• (già impostata)');
+      } else {
+        nutPwdInput.placeholder = t('tab_nut.ph_nut_pwd_unset', 'Nessuna password impostata');
+      }
+
+      // Populate Status tab
+      const isOnline = cfg.server_status === 'online';
+      const isBattery = cfg.ups_status_raw && cfg.ups_status_raw.includes('OB');
+
+      const pillConn = document.getElementById('stat-pill-conn');
+      if (pillConn) {
+        pillConn.className = isOnline ? 'status-pill online' : 'status-pill offline';
+        pillConn.innerText = isOnline ? t('tab_status.conn_online', 'ONLINE') : t('tab_status.conn_offline', 'OFFLINE');
+      }
+      document.getElementById('stat-val-target').innerText = `${cfg.nut_host}:${cfg.nut_port}`;
+      document.getElementById('stat-val-ups').innerText = cfg.ups_name || 'ups';
+      
+      const syncTime = cfg.last_update ? new Date(cfg.last_update * 1000).toLocaleTimeString() : t('tab_status.waiting', 'In attesa...');
+      document.getElementById('stat-val-sync').innerText = syncTime;
+
+      const errBox = document.getElementById('stat-box-error');
+      if (errBox) {
+        if (!isOnline && cfg.error_message) {
+          errBox.style.display = 'flex';
+          document.getElementById('stat-msg-error').innerText = cfg.error_message;
+        } else {
+          errBox.style.display = 'none';
+        }
+      }
+
+      const pillMode = document.getElementById('stat-pill-mode');
+      if (pillMode) {
+        if (!isOnline) {
+          pillMode.className = 'status-pill offline';
+          pillMode.innerText = t('tab_status.status_offline', 'OFFLINE');
+        } else if (isBattery) {
+          pillMode.className = 'status-pill warning';
+          pillMode.innerText = t('tab_status.status_battery', 'SU BATTERIA (OB)');
+        } else {
+          pillMode.className = 'status-pill online';
+          pillMode.innerText = t('tab_status.status_online', 'IN LINEA (OL)');
+        }
+      }
+
+      const displayUpsStatus = translateUpsStatus(cfg.ups_status_raw || cfg.ups_status || (isBattery ? 'OB' : 'OL'));
+      document.getElementById('stat-val-mode').innerText = isOnline ? displayUpsStatus : t('subbar.nut_unreachable', 'Server NUT non raggiungibile');
+      document.getElementById('stat-val-model').innerText = cfg.ups_model || t('tab_status.model_generic', 'Non rilevato o generico');
+      
+      const metricsTpl = t('tab_status.metrics_unit', '{load}% carico • {batt}% batteria');
+      const metricsStr = isOnline ? metricsTpl.replace('{load}', cfg.load || 0).replace('{batt}', cfg.battery || 0) : '--';
+      document.getElementById('stat-val-metrics').innerText = metricsStr;
+
+      const statPoll = document.getElementById('stat-val-poll');
+      if (statPoll) {
+        statPoll.innerText = `${pollSec}s`;
+      }
+
+      const statVolt = document.getElementById('stat-val-voltage');
+      if (statVolt) {
+        if (isOnline && cfg.voltage !== null && cfg.voltage !== undefined) {
+          const vNum = Number(cfg.voltage);
+          statVolt.innerText = (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V';
+        } else {
+          statVolt.innerText = isOnline ? '-- V' : '--';
+        }
+      }
+
+      // Server NUT tab banner
+      const nutBanner = document.getElementById('nut-status-banner');
+      if (nutBanner) {
+        if (isOnline) {
+          nutBanner.className = 'security-status protected';
+          nutBanner.style.color = '#34d399';
+          nutBanner.style.borderColor = 'rgba(52, 211, 153, 0.3)';
+          nutBanner.innerHTML = `
+            <span class="status-dot"></span>
+            <span><strong>${t('tab_nut.status_connected', 'Server Connesso')}</strong>: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})</span>
+          `;
+        } else {
+          nutBanner.className = 'security-status';
+          nutBanner.style.color = '#ef4444';
+          nutBanner.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+          nutBanner.innerHTML = `
+            <span class="status-dot offline"></span>
+            <span><strong>${t('tab_nut.status_not_connected', 'Server Non Connesso')}</strong>: ${cfg.error_message || t('tab_nut.status_unreachable', 'Non raggiungibile')}</span>
+          `;
+        }
+      }
+
+      // Security tab status
+      const secBadge = document.getElementById('security-status-badge');
+      if (secBadge) {
+        if (cfg.has_dashboard_password) {
+          secBadge.className = 'security-status protected';
+          secBadge.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span><strong>${t('tab_security.status_protected_strong', 'Accesso Protetto')}</strong>${t('tab_security.status_protected_desc', ': La dashboard richiede autenticazione con password.')}</span>
+          `;
+        } else {
+          secBadge.className = 'security-status';
+          secBadge.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span><strong>${t('tab_security.status_open_strong', 'Accesso Libero')}</strong>${t('tab_security.status_open_desc', ': Nessuna password impostata per la dashboard.')}</span>
+          `;
+        }
+      }
+
+      // Language selector value in modal
+      const langSel = document.getElementById('cfg-language');
+      if (langSel) {
+        langSel.value = currentLangSetting;
+      }
+
+      // Keep view mode cards in sync
+      switchMode(currentMode, false);
+    }
+
     async function openSettingsModal() {
       const toast = document.getElementById('settings-toast');
       toast.innerText = '';
@@ -1633,136 +1985,18 @@
           return;
         }
         const cfg = await res.json();
-        document.getElementById('cfg-host').value = cfg.nut_host || '';
-        document.getElementById('cfg-port').value = cfg.nut_port || 3493;
-        document.getElementById('cfg-ups-name').value = cfg.ups_name || 'ups';
-        document.getElementById('cfg-nut-user').value = cfg.nut_user || '';
         document.getElementById('cfg-nut-pwd').value = '';
         document.getElementById('cfg-dash-pwd').value = '';
 
-        const pollSec = cfg.poll_interval || 2.0;
-        setPollInterval(pollSec, true);
-
-        if (cfg.has_nut_password) {
-          document.getElementById('cfg-nut-pwd').placeholder = '•••••••• (già impostata)';
-        } else {
-          document.getElementById('cfg-nut-pwd').placeholder = 'Nessuna password impostata';
-        }
-
-        // Populate Status tab
-        const isOnline = cfg.server_status === 'online';
-        const isBattery = cfg.ups_status_raw && cfg.ups_status_raw.includes('OB');
-
-        const pillConn = document.getElementById('stat-pill-conn');
-        if (pillConn) {
-          pillConn.className = isOnline ? 'status-pill online' : 'status-pill offline';
-          pillConn.innerText = isOnline ? 'ONLINE' : 'OFFLINE';
-        }
-        document.getElementById('stat-val-target').innerText = `${cfg.nut_host}:${cfg.nut_port}`;
-        document.getElementById('stat-val-ups').innerText = cfg.ups_name || 'ups';
-        
-        const syncTime = cfg.last_update ? new Date(cfg.last_update * 1000).toLocaleTimeString() : 'In attesa...';
-        document.getElementById('stat-val-sync').innerText = syncTime;
-
-        const errBox = document.getElementById('stat-box-error');
-        if (errBox) {
-          if (!isOnline && cfg.error_message) {
-            errBox.style.display = 'flex';
-            document.getElementById('stat-msg-error').innerText = cfg.error_message;
-          } else {
-            errBox.style.display = 'none';
-          }
-        }
-
-        const pillMode = document.getElementById('stat-pill-mode');
-        if (pillMode) {
-          if (!isOnline) {
-            pillMode.className = 'status-pill offline';
-            pillMode.innerText = 'OFFLINE';
-          } else if (isBattery) {
-            pillMode.className = 'status-pill warning';
-            pillMode.innerText = 'SU BATTERIA (OB)';
-          } else {
-            pillMode.className = 'status-pill online';
-            pillMode.innerText = 'IN LINEA (OL)';
-          }
-        }
-
-        document.getElementById('stat-val-mode').innerText = isOnline ? (cfg.ups_status || 'In linea (Rete AC)') : 'Server NUT non raggiungibile';
-        document.getElementById('stat-val-model').innerText = cfg.ups_model || 'Non rilevato o generico';
-        
-        const metricsStr = isOnline ? `${cfg.load || 0}% carico • ${cfg.battery || 0}% batteria` : '--';
-        document.getElementById('stat-val-metrics').innerText = metricsStr;
-
-        const statPoll = document.getElementById('stat-val-poll');
-        if (statPoll) {
-          statPoll.innerText = `${pollSec}s`;
-        }
-
-        const statVolt = document.getElementById('stat-val-voltage');
-        if (statVolt) {
-          if (isOnline && cfg.voltage !== null && cfg.voltage !== undefined) {
-            const vNum = Number(cfg.voltage);
-            statVolt.innerText = (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V';
-          } else {
-            statVolt.innerText = isOnline ? '-- V' : '--';
-          }
-        }
-
-        // Server NUT tab banner
-        const nutBanner = document.getElementById('nut-status-banner');
-        if (nutBanner) {
-          if (isOnline) {
-            nutBanner.className = 'security-status protected';
-            nutBanner.style.color = '#34d399';
-            nutBanner.style.borderColor = 'rgba(52, 211, 153, 0.3)';
-            nutBanner.innerHTML = `
-              <span class="status-dot"></span>
-              <span><strong>Server Connesso</strong>: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})</span>
-            `;
-          } else {
-            nutBanner.className = 'security-status';
-            nutBanner.style.color = '#ef4444';
-            nutBanner.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-            nutBanner.innerHTML = `
-              <span class="status-dot offline"></span>
-              <span><strong>Server Non Connesso</strong>: ${cfg.error_message || 'Non raggiungibile'}</span>
-            `;
-          }
-        }
-
-        // Security tab status
-        const secBadge = document.getElementById('security-status-badge');
-        if (secBadge) {
-          if (cfg.has_dashboard_password) {
-            secBadge.className = 'security-status protected';
-            secBadge.innerHTML = `
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-              <span><strong>Accesso Protetto</strong>: La dashboard richiede autenticazione con password.</span>
-            `;
-          } else {
-            secBadge.className = 'security-status';
-            secBadge.innerHTML = `
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <span><strong>Accesso Libero</strong>: Nessuna password impostata per la dashboard.</span>
-            `;
-          }
-        }
-
-        // Keep view mode cards in sync
-        switchMode(currentMode, false);
+        populateSettingsModal(cfg);
 
         // Open on Status tab by default
         switchSettingsTab('status');
 
-        document.getElementById('info-target-server').innerText = `Target NUT: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})`;
+        document.getElementById('info-target-server').innerText = `${t('subbar.target_nut', 'Target NUT')}: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})`;
         document.getElementById('settings-modal').classList.add('active');
       } catch (err) {
-        alert('Impossibile caricare le impostazioni: ' + err.message);
+        alert(t('toasts.alert_load_fail', 'Impossibile caricare le impostazioni: ') + err.message);
       }
     }
 
@@ -1774,7 +2008,7 @@
       e.preventDefault();
       const toast = document.getElementById('settings-toast');
       toast.style.color = '#38bdf8';
-      toast.innerText = 'Salvataggio in corso...';
+      toast.innerText = t('toasts.saving', 'Salvataggio in corso...');
 
       const host = document.getElementById('cfg-host').value.trim();
       const port = parseInt(document.getElementById('cfg-port').value);
@@ -1783,7 +2017,7 @@
       if (!host || isNaN(port) || !upsName) {
         switchSettingsTab('nut');
         toast.style.color = '#ef4444';
-        toast.innerText = 'Compila Host, Porta e Nome UPS nel tab Server NUT.';
+        toast.innerText = t('toasts.err_required_fields', 'Compila Host, Porta e Nome UPS nel tab Server NUT.');
         return;
       }
 
@@ -1791,7 +2025,7 @@
       if (isNaN(pollVal) || pollVal < 0.5) {
         switchSettingsTab('nut');
         toast.style.color = '#ef4444';
-        toast.innerText = 'Intervallo di aggiornamento non valido (minimo 0.5 secondi).';
+        toast.innerText = t('toasts.err_invalid_poll', 'Intervallo di aggiornamento non valido (minimo 0.5 secondi).');
         return;
       }
 
@@ -1818,8 +2052,8 @@
         const data = await res.json();
         if (res.ok && data.success) {
           toast.style.color = '#10b981';
-          toast.innerText = 'Impostazioni salvate con successo!';
-          document.getElementById('info-target-server').innerText = `Target NUT: ${payload.nut_host}:${payload.nut_port} (${payload.ups_name})`;
+          toast.innerText = t('toasts.saved', 'Impostazioni salvate con successo!');
+          document.getElementById('info-target-server').innerText = `${t('subbar.target_nut', 'Target NUT')}: ${payload.nut_host}:${payload.nut_port} (${payload.ups_name})`;
           restartPolling(pollVal);
           setTimeout(() => {
             closeSettingsModal();
@@ -1827,15 +2061,18 @@
           }, 1200);
         } else {
           toast.style.color = '#ef4444';
-          toast.innerText = 'Errore: ' + (data.error || 'Salvataggio fallito');
+          toast.innerText = t('toasts.err_prefix', 'Errore: ') + (data.error || 'Salvataggio fallito');
         }
       } catch (err) {
         toast.style.color = '#ef4444';
-        toast.innerText = 'Errore di rete durante il salvataggio';
+        toast.innerText = t('toasts.err_network', 'Errore di rete durante il salvataggio');
       }
     }
 
-    // Polling loop
+    // ==========================================
+    // 7. BOOTSTRAP
+    // ==========================================
+    initLocales();
     fetchStats();
     restartPolling(2.0);
   </script>
