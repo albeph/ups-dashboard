@@ -299,6 +299,35 @@ SESSION_LOCK = threading.Lock()
 COOKIE_NAME = "ups_dashboard_session"
 
 
+def format_ups_status(raw_status: str) -> str:
+    """Format raw NUT ups.status flags (e.g. OL, OB, CHRG) into human-readable Italian labels."""
+    if not raw_status:
+        return "In linea"
+    flags = raw_status.strip().upper().split()
+    labels = []
+    if "OL" in flags:
+        labels.append("In linea (Rete AC)")
+    if "OB" in flags:
+        labels.append("Su batteria (Blackout)")
+    if "LB" in flags:
+        labels.append("Batteria critica (LB)")
+    if "CHRG" in flags:
+        labels.append("In carica")
+    if "DISCHRG" in flags:
+        labels.append("In scarica")
+    if "BYPASS" in flags:
+        labels.append("Bypass")
+    if "CAL" in flags:
+        labels.append("Calibrazione")
+    if "OVER" in flags:
+        labels.append("Sovraccarico")
+    if "OFF" in flags:
+        labels.append("Spento")
+    if "RB" in flags:
+        labels.append("Sostituire batteria")
+    return " • ".join(labels) if labels else raw_status
+
+
 class NUTDataCache:
     """Thread-safe cache holding real-time telemetry from NUT daemon."""
 
@@ -308,15 +337,21 @@ class NUTDataCache:
         self.watts = None
         self.load = 0
         self.battery = 100
+        self.ups_status = "In connessione..."
+        self.ups_status_raw = ""
+        self.ups_model = ""
         self.last_update = 0
         self.error_message = ""
 
-    def update(self, status, watts, load, battery, error_message=""):
+    def update(self, status, watts, load, battery, ups_status="", ups_status_raw="", ups_model="", error_message=""):
         with self.lock:
             self.status = status
             self.watts = watts
             self.load = load
             self.battery = battery
+            self.ups_status = ups_status
+            self.ups_status_raw = ups_status_raw
+            self.ups_model = ups_model
             self.error_message = error_message
             self.last_update = time.time()
 
@@ -327,6 +362,9 @@ class NUTDataCache:
                 "watts": self.watts,
                 "load": self.load,
                 "battery": self.battery,
+                "ups_status": self.ups_status,
+                "ups_status_raw": self.ups_status_raw,
+                "ups_model": self.ups_model,
                 "last_update": self.last_update,
                 "error_message": self.error_message,
                 "auth_required": config.is_auth_required(),
@@ -382,6 +420,9 @@ def poll_nut_daemon():
                     return parse_nut_var(res)
 
                 # Query key metrics
+                status_raw = query_var("ups.status")
+                model_raw = query_var("device.model") or query_var("ups.model")
+                mfr_raw = query_var("device.mfr") or query_var("ups.mfr")
                 load_raw = query_var("ups.load")
                 battery_raw = query_var("battery.charge")
                 realpower_raw = query_var("ups.realpower") or query_var("output.realpower")
@@ -415,10 +456,18 @@ def poll_nut_daemon():
                         except ValueError:
                             pass
 
-                cache.update("online", watts_val, round(load_val), round(battery_val))
+                model_full = f"{mfr_raw} {model_raw}".strip() if (mfr_raw or model_raw) else ""
+                cache.update("online", watts_val, round(load_val), round(battery_val),
+                             ups_status=format_ups_status(status_raw),
+                             ups_status_raw=status_raw or "",
+                             ups_model=model_full)
 
         except Exception as e:
-            cache.update("offline", None, 0, 0, error_message=str(e))
+            cache.update("offline", None, 0, 0,
+                         ups_status="Disconnesso",
+                         ups_status_raw="",
+                         ups_model="",
+                         error_message=str(e))
 
         # Wait for either interval expiration or reload trigger
         config.reload_event.wait(timeout=poll_int)
@@ -487,6 +536,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self.send_json({"error": "Unauthorized", "auth_required": True}, status=401)
                 return
             current = config.get_all()
+            telemetry = cache.get_data()
             self.send_json({
                 "nut_host": current["nut_host"],
                 "nut_port": current["nut_port"],
@@ -496,6 +546,15 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "has_dashboard_password": config.is_auth_required(),
                 "poll_interval": current["poll_interval"],
                 "version": APP_VERSION,
+                "server_status": telemetry["status"],
+                "ups_status": telemetry.get("ups_status", ""),
+                "ups_status_raw": telemetry.get("ups_status_raw", ""),
+                "ups_model": telemetry.get("ups_model", ""),
+                "error_message": telemetry.get("error_message", ""),
+                "last_update": telemetry.get("last_update", 0),
+                "load": telemetry.get("load", 0),
+                "battery": telemetry.get("battery", 0),
+                "watts": telemetry.get("watts", None),
             })
             return
 
