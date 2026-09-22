@@ -384,8 +384,8 @@
       border: 1px solid #374151;
       border-radius: 18px;
       width: 100%;
-      max-width: 480px;
-      padding: 24px;
+      max-width: 500px;
+      padding: 22px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
       position: relative;
     }
@@ -396,11 +396,11 @@
       align-items: center;
       padding-bottom: 12px;
       border-bottom: 1px solid #1f2937;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .modal-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       color: #f9fafb;
     }
@@ -416,6 +416,166 @@
 
     .close-btn:hover {
       color: #ffffff;
+    }
+
+    /* MODAL TABS */
+    .modal-tabs {
+      display: flex;
+      gap: 6px;
+      background: #0b0f19;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 18px;
+    }
+
+    .modal-tab-btn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid transparent;
+      color: #9ca3af;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .modal-tab-btn:hover {
+      color: #f9fafb;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .modal-tab-btn.active {
+      background: #1f2937;
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    .tab-pane {
+      min-height: 200px;
+    }
+
+    /* MODE CARDS (ASPETTO TAB) */
+    .mode-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .mode-card {
+      background: #0b0f19;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .mode-card:hover {
+      border-color: #374151;
+      background: #0e1526;
+    }
+
+    .mode-card.active {
+      border-color: #38bdf8;
+      background: rgba(2, 132, 199, 0.1);
+      box-shadow: 0 0 0 1px #38bdf8;
+    }
+
+    .mode-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-radio {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #4b5563;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .mode-card.active .mode-radio {
+      border-color: #38bdf8;
+    }
+
+    .mode-card.active .mode-radio::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #38bdf8;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .mode-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f9fafb;
+    }
+
+    .mode-desc {
+      font-size: 10.5px;
+      color: #9ca3af;
+      line-height: 1.4;
+    }
+
+    .mode-preview-bar {
+      height: 6px;
+      background: #1f2937;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .mode-preview-fill {
+      height: 100%;
+      width: 65%;
+      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      border-radius: 999px;
+    }
+
+    .mode-preview-gauge {
+      display: flex;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    /* SECURITY STATUS BANNER */
+    .security-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #0b0f19;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      font-size: 11.5px;
+      color: #9ca3af;
+    }
+
+    .security-status.protected {
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.3);
     }
 
     .form-section {
@@ -683,52 +843,127 @@
   <div id="settings-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title">Impostazioni Dashboard & NUT</h3>
+        <h3 class="modal-title">Impostazioni Dashboard</h3>
         <button class="close-btn" onclick="closeSettingsModal()">&times;</button>
       </div>
 
-      <form id="settings-form" onsubmit="handleSaveSettings(event)">
+      <!-- MODAL TABS -->
+      <div class="modal-tabs">
+        <button type="button" id="tab-btn-nut" class="modal-tab-btn active" onclick="switchSettingsTab('nut')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+          <span>Server NUT</span>
+        </button>
+        <button type="button" id="tab-btn-appearance" class="modal-tab-btn" onclick="switchSettingsTab('appearance')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10"></path>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+          <span>Aspetto</span>
+        </button>
+        <button type="button" id="tab-btn-security" class="modal-tab-btn" onclick="switchSettingsTab('security')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Sicurezza</span>
+        </button>
+      </div>
+
+      <form id="settings-form" novalidate onsubmit="handleSaveSettings(event)">
         
-        <!-- SECTION: SERVER NUT -->
-        <div class="form-section">
-          <div class="section-label">Server NUT</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="cfg-host">Host o IP</label>
-              <input id="cfg-host" class="form-input" placeholder="es. 192.168.1.50" required>
+        <!-- TAB 1: SERVER NUT -->
+        <div id="tab-pane-nut" class="tab-pane">
+          <div class="form-section">
+            <div class="section-label">Parametri Connessione</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cfg-host">Host o IP</label>
+                <input id="cfg-host" class="form-input" placeholder="es. 192.168.1.50">
+              </div>
+              <div class="form-group">
+                <label for="cfg-port">Porta TCP</label>
+                <input id="cfg-port" type="number" class="form-input" placeholder="3493">
+              </div>
             </div>
             <div class="form-group">
-              <label for="cfg-port">Porta TCP</label>
-              <input id="cfg-port" type="number" class="form-input" placeholder="3493" required>
+              <label for="cfg-ups-name">Nome UPS</label>
+              <input id="cfg-ups-name" class="form-input" placeholder="ups">
             </div>
           </div>
-          <div class="form-group">
-            <label for="cfg-ups-name">Nome UPS</label>
-            <input id="cfg-ups-name" class="form-input" placeholder="ups" required>
+
+          <div class="form-section">
+            <div class="section-label">Credenziali Demone NUT (Opzionali)</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cfg-nut-user">Username NUT</label>
+                <input id="cfg-nut-user" class="form-input" placeholder="es. upsmon">
+              </div>
+              <div class="form-group">
+                <label for="cfg-nut-pwd">Password NUT</label>
+                <input id="cfg-nut-pwd" type="password" class="form-input" placeholder="Lascia vuoto per non cambiare">
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- SECTION: CREDENZIALI NUT -->
-        <div class="form-section">
-          <div class="section-label">Credenziali NUT (Opzionali)</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="cfg-nut-user">Username NUT</label>
-              <input id="cfg-nut-user" class="form-input" placeholder="es. upsmon">
+        <!-- TAB 2: ASPETTO (SEMICERCHIO O BARRA) -->
+        <div id="tab-pane-appearance" class="tab-pane" style="display: none;">
+          <div class="form-section">
+            <div class="section-label">Stile Indicatori Telemetria</div>
+            <div class="mode-options-grid">
+              <div id="opt-mode-bars" class="mode-card active" onclick="selectSettingsMode('bars')">
+                <div class="mode-card-header">
+                  <div class="mode-radio"></div>
+                  <span class="mode-title">Barre Orizzontali</span>
+                </div>
+                <div class="mode-desc">Visualizzazione lineare e compatta con barre di riempimento a gradiente dinamico.</div>
+                <div class="mode-preview-bar">
+                  <div class="mode-preview-fill"></div>
+                </div>
+              </div>
+
+              <div id="opt-mode-gauge" class="mode-card" onclick="selectSettingsMode('gauge')">
+                <div class="mode-card-header">
+                  <div class="mode-radio"></div>
+                  <span class="mode-title">Semicerchio (Gauge)</span>
+                </div>
+                <div class="mode-desc">Cruscotto grafico con indicatori circolari ad arco SVG ispirati a strumenti analogici.</div>
+                <div class="mode-preview-gauge">
+                  <svg width="50" height="28" viewBox="0 0 100 55">
+                    <path class="gauge-bg" d="M 15 50 A 35 35 0 0 1 85 50" />
+                    <path class="gauge-val" d="M 15 50 A 35 35 0 0 1 85 50" style="stroke: #38bdf8; stroke-dasharray: 110; stroke-dashoffset: 40;" />
+                  </svg>
+                </div>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="cfg-nut-pwd">Password NUT</label>
-              <input id="cfg-nut-pwd" type="password" class="form-input" placeholder="Lascia vuoto per non cambiare">
+            <div style="font-size: 11px; color: #6b7280; margin-top: 14px; text-align: center;">
+              La modalità scelta viene applicata immediatamente alla dashboard e memorizzata nel browser.
             </div>
           </div>
         </div>
 
-        <!-- SECTION: PASSWORD PORTALE -->
-        <div class="form-section">
-          <div class="section-label">Sicurezza Portale</div>
-          <div class="form-group">
-            <label for="cfg-dash-pwd">Nuova Password Dashboard</label>
-            <input id="cfg-dash-pwd" type="password" class="form-input" placeholder="Lascia vuoto per mantenere l'attuale">
+        <!-- TAB 3: SICUREZZA -->
+        <div id="tab-pane-security" class="tab-pane" style="display: none;">
+          <div class="form-section">
+            <div class="section-label">Stato Autenticazione Portale</div>
+            <div id="security-status-badge" class="security-status"></div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-label">Aggiorna Password Dashboard</div>
+            <div class="form-group">
+              <label for="cfg-dash-pwd">Nuova Password Dashboard</label>
+              <input id="cfg-dash-pwd" type="password" class="form-input" placeholder="Lascia vuoto per mantenere l'attuale">
+              <span style="font-size: 11px; color: #6b7280; margin-top: 4px;">
+                Cifratura irreversibile con PBKDF2-HMAC-SHA256 (100.000 iterazioni crittografiche).
+              </span>
+            </div>
           </div>
         </div>
 
@@ -767,14 +1002,35 @@
       if (save) localStorage.setItem('ups_view_mode', mode);
 
       const isBars = mode === 'bars';
-      document.getElementById('btn-tab-bars').classList.toggle('active', isBars);
-      document.getElementById('btn-tab-gauge').classList.toggle('active', !isBars);
+      const btnBars = document.getElementById('btn-tab-bars');
+      const btnGauge = document.getElementById('btn-tab-gauge');
+      if (btnBars) btnBars.classList.toggle('active', isBars);
+      if (btnGauge) btnGauge.classList.toggle('active', !isBars);
+
+      const optBars = document.getElementById('opt-mode-bars');
+      const optGauge = document.getElementById('opt-mode-gauge');
+      if (optBars) optBars.classList.toggle('active', isBars);
+      if (optGauge) optGauge.classList.toggle('active', !isBars);
 
       document.getElementById('power-view-bars').style.display = isBars ? 'flex' : 'none';
       document.getElementById('power-view-gauge').style.display = isBars ? 'none' : 'flex';
 
       document.getElementById('batt-view-bars').style.display = isBars ? 'flex' : 'none';
       document.getElementById('batt-view-gauge').style.display = isBars ? 'none' : 'flex';
+    }
+
+    function selectSettingsMode(mode) {
+      switchMode(mode, true);
+    }
+
+    function switchSettingsTab(tabName) {
+      const tabs = ['nut', 'appearance', 'security'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        const pane = document.getElementById('tab-pane-' + t);
+        if (btn) btn.classList.toggle('active', t === tabName);
+        if (pane) pane.style.display = (t === tabName) ? 'block' : 'none';
+      });
     }
 
     function updateUI(data) {
@@ -981,6 +1237,34 @@
           document.getElementById('cfg-nut-pwd').placeholder = 'Nessuna password impostata';
         }
 
+        // Security tab status
+        const secBadge = document.getElementById('security-status-badge');
+        if (secBadge) {
+          if (cfg.has_dashboard_password) {
+            secBadge.className = 'security-status protected';
+            secBadge.innerHTML = `
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span><strong>Accesso Protetto</strong>: La dashboard richiede autenticazione con password.</span>
+            `;
+          } else {
+            secBadge.className = 'security-status';
+            secBadge.innerHTML = `
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span><strong>Accesso Libero</strong>: Nessuna password impostata per la dashboard.</span>
+            `;
+          }
+        }
+
+        // Keep view mode cards in sync
+        switchMode(currentMode, false);
+
+        // Open on Server NUT tab by default
+        switchSettingsTab('nut');
+
         document.getElementById('info-target-server').innerText = `Target NUT: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})`;
         document.getElementById('settings-modal').classList.add('active');
       } catch (err) {
@@ -998,10 +1282,21 @@
       toast.style.color = '#38bdf8';
       toast.innerText = 'Salvataggio in corso...';
 
+      const host = document.getElementById('cfg-host').value.trim();
+      const port = parseInt(document.getElementById('cfg-port').value);
+      const upsName = document.getElementById('cfg-ups-name').value.trim();
+
+      if (!host || isNaN(port) || !upsName) {
+        switchSettingsTab('nut');
+        toast.style.color = '#ef4444';
+        toast.innerText = 'Compila Host, Porta e Nome UPS nel tab Server NUT.';
+        return;
+      }
+
       const payload = {
-        nut_host: document.getElementById('cfg-host').value.trim(),
-        nut_port: parseInt(document.getElementById('cfg-port').value),
-        ups_name: document.getElementById('cfg-ups-name').value.trim(),
+        nut_host: host,
+        nut_port: port,
+        ups_name: upsName,
         nut_user: document.getElementById('cfg-nut-user').value.trim(),
       };
 
