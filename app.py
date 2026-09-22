@@ -55,7 +55,6 @@ class ConfigManager:
             "nut_host": os.getenv("NUT_HOST", "127.0.0.1").strip(),
             "nut_port": int(os.getenv("NUT_PORT", "3493")),
             "ups_name": os.getenv("UPS_NAME", "ups").strip(),
-            "ups_nominal_watts": float(os.getenv("UPS_NOMINAL_WATTS", "500")),
             "nut_user": os.getenv("NUT_USER", "").strip(),
             "nut_password": os.getenv("NUT_PASSWORD", "").strip(),
             "dashboard_password": os.getenv("DASHBOARD_PASSWORD", "").strip(),
@@ -115,21 +114,18 @@ class NUTDataCache:
     def __init__(self):
         self.lock = threading.Lock()
         self.status = "connecting"
-        self.watts = 0
+        self.watts = None
         self.load = 0
         self.battery = 100
-        self.nominal_watts = config.get("ups_nominal_watts", 500)
         self.last_update = 0
         self.error_message = ""
 
-    def update(self, status, watts, load, battery, nominal_watts=None, error_message=""):
+    def update(self, status, watts, load, battery, error_message=""):
         with self.lock:
             self.status = status
             self.watts = watts
             self.load = load
             self.battery = battery
-            if nominal_watts is not None:
-                self.nominal_watts = nominal_watts
             self.error_message = error_message
             self.last_update = time.time()
 
@@ -140,7 +136,6 @@ class NUTDataCache:
                 "watts": self.watts,
                 "load": self.load,
                 "battery": self.battery,
-                "nominal_watts": self.nominal_watts,
                 "last_update": self.last_update,
                 "error_message": self.error_message,
                 "auth_required": bool(config.get("dashboard_password")),
@@ -170,7 +165,6 @@ def poll_nut_daemon():
         ups_name = config.get("ups_name")
         nut_user = config.get("nut_user")
         nut_pwd = config.get("nut_password")
-        nominal_w = config.get("ups_nominal_watts")
         poll_int = config.get("poll_interval")
 
         config.reload_event.clear()
@@ -207,21 +201,29 @@ def poll_nut_daemon():
                 # Parse battery percentage
                 battery_val = float(battery_raw) if battery_raw and battery_raw.replace(".", "", 1).isdigit() else 100.0
 
-                # Determine active power in Watts
+                # Determine active power in Watts: ONLY if reported or calculated from UPS hardware!
                 watts_val = None
                 if realpower_raw:
                     clean = "".join(c for c in realpower_raw if c.isdigit() or c == ".")
                     if clean:
-                        watts_val = round(float(clean))
+                        try:
+                            watts_val = round(float(clean))
+                        except ValueError:
+                            pass
 
-                if watts_val is None:
-                    nom_calc = float(nominal_raw) if nominal_raw and nominal_raw.isdigit() else nominal_w
-                    watts_val = round((load_val * nom_calc) / 100.0)
+                if watts_val is None and nominal_raw:
+                    clean_nom = "".join(c for c in nominal_raw if c.isdigit() or c == ".")
+                    if clean_nom:
+                        try:
+                            nom_float = float(clean_nom)
+                            watts_val = round((load_val * nom_float) / 100.0)
+                        except ValueError:
+                            pass
 
-                cache.update("online", watts_val, round(load_val), round(battery_val), nominal_watts=nominal_w)
+                cache.update("online", watts_val, round(load_val), round(battery_val))
 
         except Exception as e:
-            cache.update("offline", 0, 0, 0, nominal_watts=nominal_w, error_message=str(e))
+            cache.update("offline", None, 0, 0, error_message=str(e))
 
         # Wait for either interval expiration or reload trigger
         config.reload_event.wait(timeout=poll_int)
@@ -295,7 +297,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "nut_host": current["nut_host"],
                 "nut_port": current["nut_port"],
                 "ups_name": current["ups_name"],
-                "ups_nominal_watts": current["ups_nominal_watts"],
                 "nut_user": current["nut_user"],
                 "has_nut_password": bool(current["nut_password"]),
                 "has_dashboard_password": bool(current["dashboard_password"]),
@@ -414,9 +415,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
                 if "ups_name" in req_data and req_data["ups_name"].strip():
                     updates["ups_name"] = req_data["ups_name"].strip()
-
-                if "ups_nominal_watts" in req_data:
-                    updates["ups_nominal_watts"] = float(req_data["ups_nominal_watts"])
 
                 if "nut_user" in req_data:
                     updates["nut_user"] = req_data["nut_user"].strip()

@@ -72,7 +72,8 @@ http://<INDIRIZZO_IP_DEL_HOST>:8080
 | `NUT_HOST` | `127.0.0.1` | Hostname o indirizzo IP dove risiede il demone NUT `upsd`. |
 | `NUT_PORT` | `3493` | Porta TCP di ascolto del demone NUT. |
 | `UPS_NAME` | `ups` | Identificativo dell'UPS configurato nel server NUT. |
-| `UPS_NOMINAL_WATTS` | `500` | Potenza nominale in Watt, usata per il calcolo della potenza reale nel caso in cui l'UPS non fornisca il campo `ups.realpower`. |
+| `NUT_USER` | *(vuoto)* | Username opzionale per l'autenticazione al server NUT. |
+| `NUT_PASSWORD` | *(vuoto)* | Password opzionale per l'autenticazione al server NUT. |
 | `PORT` | `8080` | Porta TCP su cui il container accetta connessioni web HTTP. |
 | `POLL_INTERVAL` | `2.0` | Secondi di intervallo tra le letture in background via socket TCP da NUT. |
 | `DASHBOARD_PASSWORD` | *(vuoto)* | Password di accesso. Se non impostata, l'accesso alla dashboard è pubblico. |

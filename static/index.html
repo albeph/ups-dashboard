@@ -595,13 +595,13 @@
         <!-- CARD 1: CONSUMO & CARICO -->
         <div class="card">
           <div class="card-header">
-            <span>Consumo & Carico</span>
+            <span id="title-card-power">Consumo & Carico</span>
             <span id="label-load-status" style="color: #38bdf8;">Normale</span>
           </div>
 
           <!-- Mode A: Progress Bar -->
           <div id="power-view-bars" class="bar-mode">
-            <div>
+            <div id="wrapper-watts-bars">
               <span id="val-watts-bars" class="val-large">--</span>
               <span class="val-unit unit-power">W</span>
             </div>
@@ -615,7 +615,7 @@
 
           <!-- Mode B: Half-Circle Gauge -->
           <div id="power-view-gauge" class="gauge-mode" style="display: none;">
-            <div>
+            <div id="wrapper-watts-gauge">
               <span id="val-watts-gauge" class="val-large">--</span>
               <span class="val-unit unit-power">W</span>
             </div>
@@ -702,15 +702,9 @@
               <input id="cfg-port" type="number" class="form-input" placeholder="3493" required>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="cfg-ups-name">Nome UPS</label>
-              <input id="cfg-ups-name" class="form-input" placeholder="ups" required>
-            </div>
-            <div class="form-group">
-              <label for="cfg-nominal-watts">Potenza Nominale (W)</label>
-              <input id="cfg-nominal-watts" type="number" class="form-input" placeholder="500" required>
-            </div>
+          <div class="form-group">
+            <label for="cfg-ups-name">Nome UPS</label>
+            <input id="cfg-ups-name" class="form-input" placeholder="ups" required>
           </div>
         </div>
 
@@ -803,10 +797,27 @@
         return;
       }
 
-      // Watts
-      const watts = data.watts !== null ? data.watts : '--';
-      document.getElementById('val-watts-bars').innerText = watts;
-      document.getElementById('val-watts-gauge').innerText = watts;
+      // Watts: mostrati solo se rilevati automaticamente dall'UPS hardware
+      const hasWatts = data.watts !== null && data.watts !== undefined;
+      const titlePower = document.getElementById('title-card-power');
+      const wrapWattsBars = document.getElementById('wrapper-watts-bars');
+      const wrapWattsGauge = document.getElementById('wrapper-watts-gauge');
+      const powerViewGauge = document.getElementById('power-view-gauge');
+
+      if (hasWatts) {
+        titlePower.innerText = 'Consumo & Carico';
+        wrapWattsBars.style.display = 'block';
+        wrapWattsGauge.style.display = 'block';
+        powerViewGauge.style.justifyContent = 'space-between';
+        document.getElementById('val-watts-bars').innerText = data.watts;
+        document.getElementById('val-watts-gauge').innerText = data.watts;
+      } else {
+        // Se non rilevato automaticamente dall'UPS, non mostrare la statistica
+        titlePower.innerText = 'Carico UPS';
+        wrapWattsBars.style.display = 'none';
+        wrapWattsGauge.style.display = 'none';
+        powerViewGauge.style.justifyContent = 'center';
+      }
 
       // Load %
       const load = Math.min(100, Math.max(0, data.load || 0));
@@ -954,7 +965,6 @@
         document.getElementById('cfg-host').value = cfg.nut_host || '';
         document.getElementById('cfg-port').value = cfg.nut_port || 3493;
         document.getElementById('cfg-ups-name').value = cfg.ups_name || 'ups';
-        document.getElementById('cfg-nominal-watts').value = cfg.ups_nominal_watts || 500;
         document.getElementById('cfg-nut-user').value = cfg.nut_user || '';
         document.getElementById('cfg-nut-pwd').value = '';
         document.getElementById('cfg-dash-pwd').value = '';
@@ -986,7 +996,6 @@
         nut_host: document.getElementById('cfg-host').value.trim(),
         nut_port: parseInt(document.getElementById('cfg-port').value),
         ups_name: document.getElementById('cfg-ups-name').value.trim(),
-        ups_nominal_watts: parseFloat(document.getElementById('cfg-nominal-watts').value),
         nut_user: document.getElementById('cfg-nut-user').value.trim(),
       };
 
