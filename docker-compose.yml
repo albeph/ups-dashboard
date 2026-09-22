@@ -1,0 +1,21 @@
+# =====================================================================
+# DOCKER COMPOSE CONFIGURATION (docker-compose.yml)
+# Universal deployment for UPS Web Dashboard
+# =====================================================================
+
+services:
+  ups-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ups-dashboard:local
+    container_name: ups-dashboard
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data

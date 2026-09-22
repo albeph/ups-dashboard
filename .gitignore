@@ -1,0 +1,15 @@
+# Environment credentials
+.env
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Runtime configuration data
+data/config.json
+data/*.json
+!data/.gitkeep
+
+# OS metadata
+.DS_Store
+Thumbs.db
