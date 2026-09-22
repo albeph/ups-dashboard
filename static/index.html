@@ -700,6 +700,63 @@
       border-color: rgba(245, 158, 11, 0.3);
     }
 
+    /* CARD SUB-BOXES (TENSIONE & ALIMENTAZIONE) */
+    .card-subbox {
+      margin-top: 14px;
+      padding: 9px 13px;
+      background: rgba(11, 15, 25, 0.75);
+      border: 1px solid #1f2937;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-subbox:hover {
+      border-color: #374151;
+      background: rgba(11, 15, 25, 0.95);
+    }
+
+    .subbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .subbox-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .subbox-badge.voltage {
+      color: #38bdf8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .subbox-badge.online {
+      color: #34d399;
+    }
+
+    .subbox-badge.battery {
+      color: #f59e0b;
+    }
+
+    .subbox-badge.offline {
+      color: #ef4444;
+    }
+
     .poll-presets {
       display: flex;
       gap: 5px;
@@ -867,7 +924,6 @@
       <div class="status-group">
         <div id="conn-dot" class="status-dot"></div>
         <span id="conn-text" class="status-text">Online</span>
-        <span id="ups-state-badge" class="ups-state-badge" style="display: none;">In linea</span>
       </div>
     </div>
 
@@ -933,6 +989,17 @@
               <span id="pct-load-gauge" class="gauge-text">0%</span>
             </div>
           </div>
+
+          <!-- BOX TENSIONE SOTTO L'UTILIZZO -->
+          <div class="card-subbox">
+            <div class="subbox-label">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Tensione</span>
+            </div>
+            <div id="subbox-voltage-val" class="subbox-badge voltage">-- V</div>
+          </div>
         </div>
 
         <!-- CARD 2: STATO BATTERIA -->
@@ -968,6 +1035,21 @@
                 <path id="arc-batt" class="gauge-val gauge-batt" d="M 15 55 A 35 35 0 0 1 85 55" />
               </svg>
               <span id="pct-batt-gauge" class="gauge-text">0%</span>
+            </div>
+          </div>
+
+          <!-- BOX ALIMENTAZIONE SOTTO LA PERCENTUALE DI BATTERIA -->
+          <div class="card-subbox">
+            <div class="subbox-label">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                <line x1="12" y1="2" x2="12" y2="12"></line>
+              </svg>
+              <span>Alimentazione</span>
+            </div>
+            <div id="subbox-mode-container" class="subbox-badge online">
+              <span id="subbox-mode-dot" class="status-dot"></span>
+              <span id="subbox-mode-text">In linea (Rete AC)</span>
             </div>
           </div>
         </div>
@@ -1082,6 +1164,10 @@
                 <div class="status-row">
                   <span class="status-label">Frequenza Refresh</span>
                   <span id="stat-val-poll" class="status-value">2.0s</span>
+                </div>
+                <div class="status-row">
+                  <span class="status-label">Tensione di Rete</span>
+                  <span id="stat-val-voltage" class="status-value">-- V</span>
                 </div>
               </div>
             </div>
@@ -1301,7 +1387,6 @@
       // Connection Status & UPS State
       const dot = document.getElementById('conn-dot');
       const connText = document.getElementById('conn-text');
-      const badgeState = document.getElementById('ups-state-badge');
       const isBattery = data.ups_status_raw && data.ups_status_raw.includes('OB');
 
       // Target NUT info
@@ -1316,12 +1401,21 @@
         dot.className = 'status-dot offline';
         connText.className = 'status-text offline';
         connText.innerText = 'Offline';
-        if (badgeState) badgeState.style.display = 'none';
         if (subStatus) {
           subStatus.innerText = '• Server non raggiungibile';
           subStatus.style.color = '#ef4444';
         }
         document.getElementById('last-update-time').innerText = data.error_message ? 'Errore: ' + data.error_message : 'Server NUT non raggiungibile';
+        const voltEl = document.getElementById('subbox-voltage-val');
+        if (voltEl) voltEl.innerText = '-- V';
+        const modeCont = document.getElementById('subbox-mode-container');
+        const modeDot = document.getElementById('subbox-mode-dot');
+        const modeText = document.getElementById('subbox-mode-text');
+        if (modeCont && modeText) {
+          modeCont.className = 'subbox-badge offline';
+          modeText.innerText = 'Disconnesso';
+          if (modeDot) modeDot.className = 'status-dot offline';
+        }
         return;
       }
 
@@ -1333,12 +1427,6 @@
         dot.className = 'status-dot';
         connText.className = 'status-text';
         connText.innerText = 'Online';
-      }
-
-      if (badgeState) {
-        badgeState.style.display = 'inline-block';
-        badgeState.className = isBattery ? 'ups-state-badge battery' : 'ups-state-badge';
-        badgeState.innerText = data.ups_status || 'In linea';
       }
 
       if (subStatus) {
@@ -1428,6 +1516,33 @@
         battStatus.style.color = '#34d399';
         barBatt.style.background = 'linear-gradient(90deg, #059669, #34d399)';
         arcBatt.style.stroke = '#34d399';
+      }
+
+      // Valore tensione nel box sotto l'utilizzo
+      const voltValEl = document.getElementById('subbox-voltage-val');
+      if (voltValEl) {
+        if (isOnline && data.voltage !== null && data.voltage !== undefined) {
+          const vNum = Number(data.voltage);
+          voltValEl.innerText = (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V';
+        } else {
+          voltValEl.innerText = isOnline ? '-- V' : '--';
+        }
+      }
+
+      // Stato alimentazione nel box sotto la percentuale di batteria
+      const modeContainer = document.getElementById('subbox-mode-container');
+      const modeDot = document.getElementById('subbox-mode-dot');
+      const modeText = document.getElementById('subbox-mode-text');
+      if (modeContainer && modeText) {
+        if (isBattery) {
+          modeContainer.className = 'subbox-badge battery';
+          modeText.innerText = data.ups_status || 'Su Batteria (OB)';
+          if (modeDot) modeDot.className = 'status-dot warning';
+        } else {
+          modeContainer.className = 'subbox-badge online';
+          modeText.innerText = data.ups_status || 'In linea (Rete AC)';
+          if (modeDot) modeDot.className = 'status-dot';
+        }
       }
 
       // Timestamp
@@ -1581,6 +1696,16 @@
         const statPoll = document.getElementById('stat-val-poll');
         if (statPoll) {
           statPoll.innerText = `${pollSec}s`;
+        }
+
+        const statVolt = document.getElementById('stat-val-voltage');
+        if (statVolt) {
+          if (isOnline && cfg.voltage !== null && cfg.voltage !== undefined) {
+            const vNum = Number(cfg.voltage);
+            statVolt.innerText = (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V';
+          } else {
+            statVolt.innerText = isOnline ? '-- V' : '--';
+          }
         }
 
         // Server NUT tab banner

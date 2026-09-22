@@ -337,18 +337,20 @@ class NUTDataCache:
         self.watts = None
         self.load = 0
         self.battery = 100
+        self.voltage = None
         self.ups_status = "In connessione..."
         self.ups_status_raw = ""
         self.ups_model = ""
         self.last_update = 0
         self.error_message = ""
 
-    def update(self, status, watts, load, battery, ups_status="", ups_status_raw="", ups_model="", error_message=""):
+    def update(self, status, watts, load, battery, voltage=None, ups_status="", ups_status_raw="", ups_model="", error_message=""):
         with self.lock:
             self.status = status
             self.watts = watts
             self.load = load
             self.battery = battery
+            self.voltage = voltage
             self.ups_status = ups_status
             self.ups_status_raw = ups_status_raw
             self.ups_model = ups_model
@@ -362,6 +364,7 @@ class NUTDataCache:
                 "watts": self.watts,
                 "load": self.load,
                 "battery": self.battery,
+                "voltage": self.voltage,
                 "ups_status": self.ups_status,
                 "ups_status_raw": self.ups_status_raw,
                 "ups_model": self.ups_model,
@@ -428,6 +431,7 @@ def poll_nut_daemon():
                 battery_raw = query_var("battery.charge")
                 realpower_raw = query_var("ups.realpower") or query_var("output.realpower")
                 nominal_raw = query_var("ups.realpower.nominal") or query_var("output.realpower.nominal")
+                voltage_raw = query_var("input.voltage") or query_var("output.voltage")
 
                 # Send LOGOUT
                 sock.sendall(b"LOGOUT\n")
@@ -437,6 +441,17 @@ def poll_nut_daemon():
 
                 # Parse battery percentage
                 battery_val = float(battery_raw) if battery_raw and battery_raw.replace(".", "", 1).isdigit() else 100.0
+
+                # Parse voltage (AC mains / input voltage)
+                voltage_val = None
+                if voltage_raw:
+                    clean_v = "".join(c for c in voltage_raw if c.isdigit() or c == ".")
+                    if clean_v:
+                        try:
+                            v_float = float(clean_v)
+                            voltage_val = round(v_float, 1)
+                        except ValueError:
+                            pass
 
                 # Determine active power in Watts: ONLY if reported or calculated from UPS hardware!
                 watts_val = None
@@ -459,12 +474,14 @@ def poll_nut_daemon():
 
                 model_full = f"{mfr_raw} {model_raw}".strip() if (mfr_raw or model_raw) else ""
                 cache.update("online", watts_val, round(load_val), round(battery_val),
+                             voltage=voltage_val,
                              ups_status=format_ups_status(status_raw),
                              ups_status_raw=status_raw or "",
                              ups_model=model_full)
 
         except Exception as e:
             cache.update("offline", None, 0, 0,
+                         voltage=None,
                          ups_status="Disconnesso",
                          ups_status_raw="",
                          ups_model="",
@@ -556,6 +573,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "load": telemetry.get("load", 0),
                 "battery": telemetry.get("battery", 0),
                 "watts": telemetry.get("watts", None),
+                "voltage": telemetry.get("voltage", None),
             })
             return
 
