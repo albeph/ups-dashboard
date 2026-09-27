@@ -102,7 +102,11 @@
     "mode_note": "Selected mode is applied immediately and remembered in your browser.",
     "section_lang": "Interface Language",
     "lang_auto": "🌐 Automatic (Detected from browser)",
-    "lang_desc": "Select your preferred interface language or keep automatic browser detection."
+    "lang_desc": "Select your preferred interface language or keep automatic browser detection.",
+    "section_pwa": "Web App (PWA)",
+    "pwa_title": "Mobile & Desktop Web App",
+    "btn_install": "Install",
+    "pwa_desc": "Install the dashboard as a standalone fullscreen app on your device: on <strong>iOS (Safari)</strong> tap the Share icon ⎋ and choose <em>\"Add to Home Screen\"</em>; on <strong>Android (Chrome)</strong> tap the menu ⋮ and select <em>\"Install app\"</em>."
   },
   "tab_security": {
     "section_auth_status": "Dashboard Authentication Status",

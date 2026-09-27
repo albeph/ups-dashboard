@@ -102,7 +102,11 @@
     "mode_note": "La modalità scelta viene applicata immediatamente alla dashboard e memorizzata nel browser.",
     "section_lang": "Lingua dell'Interfaccia",
     "lang_auto": "🌐 Automatica (Riconosciuta dal browser)",
-    "lang_desc": "Seleziona la lingua preferita o usa l'impostazione automatica basata sul tuo browser."
+    "lang_desc": "Seleziona la lingua preferita o usa l'impostazione automatica basata sul tuo browser.",
+    "section_pwa": "Applicazione Web (PWA)",
+    "pwa_title": "Web App Mobile & Desktop",
+    "btn_install": "Installa",
+    "pwa_desc": "Installa la dashboard come app a schermo intero sul tuo dispositivo: su <strong>iOS (Safari)</strong> tocca l'icona Condividi ⎋ e scegli <em>\"Aggiungi a Home\"</em>; su <strong>Android (Chrome)</strong> tocca il menu ⋮ e seleziona <em>\"Installa app\"</em>."
   },
   "tab_security": {
     "section_auth_status": "Stato Autenticazione Portale",

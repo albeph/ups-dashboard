@@ -35,12 +35,12 @@ cd ups-dashboard
 ```
 
 ### 2. Configura le variabili d'ambiente
-Copia il file di esempio `.env.example` in `.env`:
+Copia il file di esempio `data/.env.example` in `data/.env`:
 ```bash
-cp .env.example .env
+cp data/.env.example data/.env
 ```
 
-Modifica `.env` con i parametri del tuo server NUT:
+Modifica `data/.env` con i parametri del tuo server NUT:
 ```env
 NUT_HOST=192.168.1.50     # Indirizzo IP del server NUT
 NUT_PORT=3493             # Porta standard NUT
@@ -83,13 +83,17 @@ http://<INDIRIZZO_IP_DEL_HOST>:8080
 
 ```
 ups-dashboard/
-├── Dockerfile              # Immagine Alpine multi-arch ultra-leggera
+├── data/                   # Dati persistenti e configurazione ambiente
+│   ├── .env.example        # Template di configurazione
+│   ├── .env                # Variabili d'ambiente (generato)
+│   ├── config.json         # Impostazioni persistenti e credenziali cifrate
+│   └── .secret_key         # Chiave simmetrica protetta
+├── image/                  # Sorgenti e contesto di build dell'immagine Docker
+│   ├── Dockerfile          # Immagine Alpine multi-arch ultra-leggera
+│   ├── app.py              # Server HTTP e client TCP NUT (Python standard library)
+│   ├── VERSION             # Versione dell'applicazione
+│   └── static/             # Frontend completo (HTML, CSS, JS, icone, PWA)
 ├── docker-compose.yml      # Configurazione Docker Compose
-├── app.py                  # Server HTTP e client TCP NUT (Python standard library)
-├── static/
-│   └── index.html          # Interfaccia grafica completa (HTML + CSS + SVG + JS vanilla)
-├── .env.example            # Template di configurazione
-├── .gitignore              # Esclusione credenziali e file temporanei
 └── README.md               # Documentazione
 ```
 

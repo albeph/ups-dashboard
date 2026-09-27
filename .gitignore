@@ -1,5 +1,7 @@
 # Environment credentials
 .env
+data/.env
+!data/.env.example
 
 # Python bytecode
 __pycache__/

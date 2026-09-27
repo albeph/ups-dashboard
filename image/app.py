@@ -37,7 +37,12 @@ try:
 except Exception:
     APP_VERSION = "1.1.0"
 
-DATA_DIR = os.path.join(BASE_DIR, "data")
+DATA_DIR = os.getenv(
+    "DATA_DIR",
+    os.path.join(BASE_DIR, "data")
+    if os.path.isdir(os.path.join(BASE_DIR, "data"))
+    else os.path.join(os.path.dirname(BASE_DIR), "data"),
+)
 os.makedirs(DATA_DIR, exist_ok=True)
 CONFIG_FILE = os.path.join(DATA_DIR, "config.json")
 KEY_FILE = os.path.join(DATA_DIR, ".secret_key")
@@ -596,6 +601,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(payload)
 
+    def do_HEAD(self):
+        self.do_GET()
+
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
@@ -695,19 +703,28 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 self.send_error(404, "File Not Found")
                 return
 
-        # 7. Serve static files
+        # 7. Serve static files (PWA icons, manifest, service worker, locales)
         static_dir = os.path.join(BASE_DIR, "static")
         safe_path = os.path.normpath(os.path.join(static_dir, path.lstrip("/")))
         if safe_path.startswith(static_dir) and os.path.isfile(safe_path):
             content_type = "text/plain; charset=utf-8"
+            extra_headers = {}
+
             if safe_path.endswith(".css"):
                 content_type = "text/css; charset=utf-8"
             elif safe_path.endswith(".js"):
                 content_type = "application/javascript; charset=utf-8"
+                if os.path.basename(safe_path) == "sw.js":
+                    extra_headers["Service-Worker-Allowed"] = "/"
+                    extra_headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             elif safe_path.endswith(".svg"):
                 content_type = "image/svg+xml"
-            elif safe_path.endswith(".json"):
-                content_type = "application/json; charset=utf-8"
+            elif safe_path.endswith(".png"):
+                content_type = "image/png"
+            elif safe_path.endswith(".ico"):
+                content_type = "image/x-icon"
+            elif safe_path.endswith(".json") or safe_path.endswith(".webmanifest"):
+                content_type = "application/manifest+json; charset=utf-8" if "manifest" in safe_path else "application/json; charset=utf-8"
             elif safe_path.endswith(".md"):
                 content_type = "text/markdown; charset=utf-8"
 
@@ -716,6 +733,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(content)))
+            for hk, hv in extra_headers.items():
+                self.send_header(hk, hv)
             self.end_headers()
             self.wfile.write(content)
             return
