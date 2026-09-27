@@ -90,7 +90,15 @@ ups-dashboard/
 │   └── .secret_key         # Chiave simmetrica protetta
 ├── image/                  # Sorgenti e contesto di build dell'immagine Docker
 │   ├── Dockerfile          # Immagine Alpine multi-arch ultra-leggera
-│   ├── app.py              # Server HTTP e client TCP NUT (Python standard library)
+│   ├── app.py              # Entrypoint applicativo
+│   ├── dashboard/          # Moduli Python (zero dipendenze pip, standard library)
+│   │   ├── config.py       # Gestione impostazioni e migrazione credenziali
+│   │   ├── security.py     # Cifratura, hashing PBKDF2 e gestione sessioni
+│   │   ├── nut.py          # Client TCP socket NUT e parser protocollo
+│   │   ├── collector.py    # Cache telemetria e gestione standby/wake
+│   │   ├── router.py       # Controller API REST e serving file statici
+│   │   ├── server.py       # Handler HTTP e ciclo di vita del server
+│   │   └── constants.py    # Costanti e risoluzione percorsi
 │   ├── VERSION             # Versione dell'applicazione
 │   └── static/             # Frontend completo (HTML, CSS, JS, icone, PWA)
 ├── docker-compose.yml      # Configurazione Docker Compose

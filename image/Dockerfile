@@ -15,6 +15,7 @@ WORKDIR /app
 RUN addgroup -g 1000 -S appgroup && adduser -u 1000 -S appuser -G appgroup
 
 # Copy application files
+COPY dashboard /app/dashboard
 COPY app.py /app/app.py
 COPY VERSION /app/VERSION
 COPY static /app/static

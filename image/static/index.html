@@ -1620,6 +1620,17 @@
       return val !== null ? val : (fallback || key);
     }
 
+    // HTML sanitizer to prevent XSS
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     // Translate UPS status code(s)
     function translateUpsStatus(rawStatus) {
       if (!rawStatus) return t('cards.feed_online', 'Rete elettrica');
@@ -2174,7 +2185,7 @@
           nutBanner.style.borderColor = 'rgba(52, 211, 153, 0.3)';
           nutBanner.innerHTML = `
             <span class="status-dot"></span>
-            <span><strong>${t('tab_nut.status_connected', 'Server Connesso')}</strong>: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})</span>
+            <span><strong>${escapeHtml(t('tab_nut.status_connected', 'Server Connesso'))}</strong>: ${escapeHtml(cfg.nut_host)}:${escapeHtml(cfg.nut_port)} (${escapeHtml(cfg.ups_name)})</span>
           `;
         } else {
           nutBanner.className = 'security-status';
@@ -2182,7 +2193,7 @@
           nutBanner.style.borderColor = 'rgba(239, 68, 68, 0.3)';
           nutBanner.innerHTML = `
             <span class="status-dot offline"></span>
-            <span><strong>${t('tab_nut.status_not_connected', 'Server Non Connesso')}</strong>: ${cfg.error_message || t('tab_nut.status_unreachable', 'Non raggiungibile')}</span>
+            <span><strong>${escapeHtml(t('tab_nut.status_not_connected', 'Server Non Connesso'))}</strong>: ${escapeHtml(cfg.error_message || t('tab_nut.status_unreachable', 'Non raggiungibile'))}</span>
           `;
         }
       }
