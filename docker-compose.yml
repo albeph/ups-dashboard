@@ -8,7 +8,6 @@ services:
     build:
       context: ./image
       dockerfile: Dockerfile
-    image: ups-dashboard:local
     container_name: ups-dashboard
     restart: unless-stopped
     ports:
