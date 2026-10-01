@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import tempfile
 import threading
 from typing import Any, Dict, Optional
 
@@ -36,6 +37,7 @@ class ConfigManager:
         secret_key: Optional[bytes] = None,
     ):
         self.filepath = filepath
+        self.backup_filepath = f"{filepath}.bak"
         self.lock = threading.Lock()
         self.reload_event = threading.Event()
         self.secret_key = secret_key or KeyManager.get_or_create_key(key_file)
@@ -78,40 +80,42 @@ class ConfigManager:
         needs_save = False
 
         # Override with persisted config.json if present
-        if os.path.isfile(self.filepath):
-            try:
-                with open(self.filepath, "r", encoding="utf-8") as f:
-                    saved = json.load(f)
+        saved = self._load_json_file(self.filepath)
+        if saved is None and os.path.isfile(self.filepath):
+            backup_saved = self._load_json_file(self.backup_filepath)
+            if backup_saved is not None:
+                saved = backup_saved
+                needs_save = True
+                logger.warning("Recovered configuration from backup after primary config read failure.")
 
-                # Check for legacy plaintext passwords to migrate
-                if "dashboard_password" in saved:
-                    raw_dash = saved.pop("dashboard_password", None)
-                    plain_dash = str(raw_dash).strip() if raw_dash is not None else ""
-                    if plain_dash:
-                        defaults["dashboard_password_hash"] = hash_password(plain_dash)
-                        logger.info("Migrated plaintext dashboard_password to PBKDF2 hash.")
-                    else:
-                        defaults["dashboard_password_hash"] = ""
-                        logger.info("Cleaned empty legacy dashboard_password.")
-                    needs_save = True
+        if saved is not None:
+            # Check for legacy plaintext passwords to migrate
+            if "dashboard_password" in saved:
+                raw_dash = saved.pop("dashboard_password", None)
+                plain_dash = str(raw_dash).strip() if raw_dash is not None else ""
+                if plain_dash:
+                    defaults["dashboard_password_hash"] = hash_password(plain_dash)
+                    logger.info("Migrated plaintext dashboard_password to PBKDF2 hash.")
+                else:
+                    defaults["dashboard_password_hash"] = ""
+                    logger.info("Cleaned empty legacy dashboard_password.")
+                needs_save = True
 
-                if "nut_password" in saved:
-                    raw_nut = saved.pop("nut_password", None)
-                    plain_nut = str(raw_nut) if raw_nut is not None else ""
-                    if plain_nut:
-                        defaults["nut_password_encrypted"] = encrypt_secret(plain_nut, self.secret_key)
-                        logger.info("Migrated plaintext nut_password to encrypted secret.")
-                    else:
-                        defaults["nut_password_encrypted"] = ""
-                        logger.info("Cleaned empty legacy nut_password.")
-                    needs_save = True
+            if "nut_password" in saved:
+                raw_nut = saved.pop("nut_password", None)
+                plain_nut = str(raw_nut) if raw_nut is not None else ""
+                if plain_nut:
+                    defaults["nut_password_encrypted"] = encrypt_secret(plain_nut, self.secret_key)
+                    logger.info("Migrated plaintext nut_password to encrypted secret.")
+                else:
+                    defaults["nut_password_encrypted"] = ""
+                    logger.info("Cleaned empty legacy nut_password.")
+                needs_save = True
 
-                for k, v in saved.items():
-                    if k in defaults and v is not None:
-                        defaults[k] = v
-                logger.info(f"Loaded persistent configuration from {self.filepath}")
-            except Exception as e:
-                logger.warning(f"Failed to read {self.filepath}: {e}")
+            for k, v in saved.items():
+                if k in defaults and v is not None:
+                    defaults[k] = v
+            logger.info(f"Loaded persistent configuration from {self.filepath}")
 
         # Set strict permissions and save migrated config if needed
         if needs_save:
@@ -129,14 +133,47 @@ class ConfigManager:
         return defaults
 
     def _save_to_disk(self, config_dict: Dict[str, Any]) -> None:
-        os.makedirs(os.path.dirname(os.path.abspath(self.filepath)), exist_ok=True)
+        self._atomic_write_json(self.filepath, config_dict)
+        try:
+            self._atomic_write_json(self.backup_filepath, config_dict)
+        except Exception as e:
+            logger.warning(f"Failed to save config backup {self.backup_filepath}: {e}")
+
+    def _load_json_file(self, filepath: str) -> Optional[Dict[str, Any]]:
+        if not os.path.isfile(filepath):
+            return None
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+            if not isinstance(loaded, dict):
+                raise ValueError("Configuration payload must be a JSON object")
+            return loaded
+        except Exception as e:
+            logger.warning(f"Failed to read {filepath}: {e}")
+            return None
+
+    def _atomic_write_json(self, filepath: str, config_dict: Dict[str, Any]) -> None:
+        directory = os.path.dirname(os.path.abspath(filepath))
+        os.makedirs(directory, exist_ok=True)
         flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
         mode = 0o600
-        fd = os.open(self.filepath, flags, mode)
-        with open(fd, "w", encoding="utf-8") as f:
-            json.dump(config_dict, f, indent=2)
+        fd, temp_path = tempfile.mkstemp(prefix=".cfg.", suffix=".tmp", dir=directory)
         try:
-            os.chmod(self.filepath, 0o600)
+            os.close(fd)
+            write_fd = os.open(temp_path, flags, mode)
+            with open(write_fd, "w", encoding="utf-8") as f:
+                json.dump(config_dict, f, indent=2)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(temp_path, filepath)
+        finally:
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    pass
+        try:
+            os.chmod(filepath, 0o600)
         except Exception:
             pass
 
