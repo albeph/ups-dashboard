@@ -8,9 +8,12 @@
     "brand_title": "UPS Dashboard",
     "status_online": "Online",
     "status_offline": "Offline",
+    "status_needs_config": "Config needed",
     "status_battery": "On Battery (OB)",
     "btn_settings": "Settings",
     "btn_settings_title": "NUT Server and Dashboard Settings",
+    "btn_customize": "Customize",
+    "btn_customize_title": "Open NUT configuration",
     "btn_lock": "Lock",
     "btn_lock_title": "Lock session"
   },
@@ -37,7 +40,8 @@
     "waiting_data": "Waiting for data...",
     "last_update": "Last updated: ",
     "error_prefix": "Error: ",
-    "nut_unreachable": "NUT server unreachable"
+    "nut_unreachable": "NUT server unreachable",
+    "config_required": "NUT configuration required"
   },
   "modal": {
     "title": "Dashboard Settings",
@@ -45,7 +49,7 @@
     "tab_nut": "NUT Server",
     "tab_appearance": "Appearance",
     "tab_security": "Security",
-    "btn_cancel": "Cancel",
+    "btn_cancel": "Close",
     "btn_save": "Save Changes"
   },
   "tab_status": {
@@ -67,13 +71,16 @@
     "status_offline": "OFFLINE",
     "waiting": "Waiting...",
     "model_generic": "Not detected or generic",
-    "metrics_unit": "{load}% load • {batt}% battery"
+    "metrics_unit": "{load}% load • {batt}% battery",
+    "section_nerd_stats": "Nerd Stats (Raw NUT)",
+    "nerd_no_data": "No raw NUT data available."
   },
   "tab_nut": {
     "section_conn_status": "Current Connection Status",
     "status_waiting": "Waiting for verification...",
     "status_connected": "Server Connected",
     "status_not_connected": "Server Disconnected",
+    "status_needs_config": "Configuration required",
     "status_unreachable": "Unreachable",
     "section_params": "Connection Parameters",
     "label_host": "Host or IP",

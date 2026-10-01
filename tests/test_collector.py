@@ -27,12 +27,14 @@ class TestCollector(unittest.TestCase):
             ups_status="Rete elettrica",
             ups_status_raw="OL",
             ups_model="APC Smart-UPS",
+            raw_vars={"ups.status": "OL", "battery.charge": "100"},
         )
         cache.update_metrics(metrics)
         data = cache.get_data()
         self.assertEqual(data["status"], "online")
         self.assertEqual(data["watts"], 350)
         self.assertEqual(data["load"], 35)
+        self.assertEqual(data["nut_raw_vars"]["ups.status"], "OL")
         self.assertGreater(data["last_update"], 0)
 
         # Mark offline
@@ -40,6 +42,12 @@ class TestCollector(unittest.TestCase):
         data_off = cache.get_data()
         self.assertEqual(data_off["status"], "offline")
         self.assertEqual(data_off["error_message"], "Connection refused")
+        self.assertEqual(data_off["nut_raw_vars"], {})
+
+        cache.update_unconfigured("Configuration required")
+        data_cfg = cache.get_data()
+        self.assertEqual(data_cfg["status"], "unconfigured")
+        self.assertEqual(data_cfg["error_message"], "Configuration required")
 
     def test_activity_tracker_idle_and_suspension(self):
         tracker = ActivityTracker()

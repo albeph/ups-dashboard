@@ -838,6 +838,24 @@
       gap: 6px;
     }
 
+    .nerd-stats-box {
+      width: 100%;
+      min-height: 150px;
+      max-height: 280px;
+      overflow: auto;
+      margin: 0;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      background: #0b0f19;
+      color: #d1d5db;
+      font-size: 12px;
+      line-height: 1.45;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
     .ups-state-badge {
       font-size: 11px;
       font-weight: 700;
@@ -1107,6 +1125,14 @@
         <span class="btn-text" data-i18n="topbar.btn_settings">Impostazioni</span>
       </button>
 
+      <button class="action-btn" onclick="openSettingsModal('nut')" data-i18n-title="topbar.btn_customize_title" title="Personalizza configurazione NUT" aria-label="Customize">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+        </svg>
+        <span class="btn-text" data-i18n="topbar.btn_customize">Personalizza</span>
+      </button>
+
       <!-- LOCK / LOGOUT BUTTON -->
       <button id="btn-lock" class="action-btn btn-lock" onclick="doLogout()" data-i18n-title="topbar.btn_lock_title" title="Blocca sessione" aria-label="Lock">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1351,6 +1377,11 @@
               </div>
             </div>
 
+            <div class="form-section">
+              <div class="section-label" data-i18n="tab_status.section_nerd_stats">Nerd Stats (Raw NUT)</div>
+              <pre id="stat-val-nerd" class="nerd-stats-box">--</pre>
+            </div>
+
           </div>
         </div>
 
@@ -1507,7 +1538,7 @@
         <div id="settings-toast" class="toast-msg"></div>
 
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" onclick="closeSettingsModal()" data-i18n="modal.btn_cancel">Annulla</button>
+          <button type="button" class="btn-cancel" onclick="closeSettingsModal()" data-i18n="modal.btn_cancel">Chiudi</button>
           <button type="submit" class="btn-save" data-i18n="modal.btn_save">Salva Modifiche</button>
         </div>
 
@@ -1629,6 +1660,16 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    function formatNerdStats(rawVars) {
+      if (!rawVars || typeof rawVars !== 'object' || Object.keys(rawVars).length === 0) {
+        return t('tab_status.nerd_no_data', 'Nessun dato NUT grezzo disponibile.');
+      }
+      return Object.keys(rawVars)
+        .sort()
+        .map(k => `${k} = ${rawVars[k]}`)
+        .join('\n');
     }
 
     // Translate UPS status code(s)
@@ -1858,17 +1899,24 @@
       const isBattery = data.ups_status_raw && data.ups_status_raw.includes('OB');
 
       // Target NUT info
-      if (data.nut_host && data.nut_port) {
+      if (data.nut_configured && data.nut_host && data.nut_port) {
         const ups = data.ups_name ? ` (${data.ups_name})` : '';
         safeSetText('info-target-server', `${t('subbar.target_nut', 'Target NUT')}: ${data.nut_host}:${data.nut_port}${ups}`);
+      } else if (!data.nut_configured) {
+        safeSetText('info-target-server', t('subbar.config_required', 'Configurazione NUT richiesta'));
       }
 
       if (!isOnline) {
         if (connGroup) safeSetClass(connGroup, 'status-group offline');
         safeSetClass(dot, 'status-dot offline');
         safeSetClass(connText, 'status-text offline');
-        safeSetText(connText, t('topbar.status_offline', 'Offline'));
-        safeSetText('last-update-time', data.error_message ? (t('subbar.error_prefix', 'Errore: ') + data.error_message) : t('subbar.nut_unreachable', 'Server NUT non raggiungibile'));
+        if (data.status === 'unconfigured') {
+          safeSetText(connText, t('topbar.status_needs_config', 'Config needed'));
+          safeSetText('last-update-time', data.error_message || t('subbar.config_required', 'Configurazione NUT richiesta'));
+        } else {
+          safeSetText(connText, t('topbar.status_offline', 'Offline'));
+          safeSetText('last-update-time', data.error_message ? (t('subbar.error_prefix', 'Errore: ') + data.error_message) : t('subbar.nut_unreachable', 'Server NUT non raggiungibile'));
+        }
         safeSetText('subbox-voltage-val', '-- V');
         safeSetClass('subbox-mode-container', 'subbox-badge offline');
         safeSetText('subbox-mode-text', t('cards.feed_disconnected', 'Disconnesso'));
@@ -2166,6 +2214,7 @@
       const metricsTpl = t('tab_status.metrics_unit', '{load}% carico • {batt}% batteria');
       const metricsStr = isOnline ? metricsTpl.replace('{load}', cfg.load || 0).replace('{batt}', cfg.battery || 0) : '--';
       safeSetText('stat-val-metrics', metricsStr);
+      safeSetText('stat-val-nerd', formatNerdStats(cfg.nut_raw_vars));
 
       safeSetText('stat-val-poll', `${pollSec}s`);
 
@@ -2186,6 +2235,14 @@
           nutBanner.innerHTML = `
             <span class="status-dot"></span>
             <span><strong>${escapeHtml(t('tab_nut.status_connected', 'Server Connesso'))}</strong>: ${escapeHtml(cfg.nut_host)}:${escapeHtml(cfg.nut_port)} (${escapeHtml(cfg.ups_name)})</span>
+          `;
+        } else if (!cfg.nut_configured) {
+          nutBanner.className = 'security-status';
+          nutBanner.style.color = '#f59e0b';
+          nutBanner.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+          nutBanner.innerHTML = `
+            <span class="status-dot warning"></span>
+            <span><strong>${escapeHtml(t('tab_nut.status_needs_config', 'Configurazione richiesta'))}</strong>: ${escapeHtml(cfg.error_message || t('subbar.config_required', 'Configurazione NUT richiesta'))}</span>
           `;
         } else {
           nutBanner.className = 'security-status';
@@ -2230,7 +2287,7 @@
       switchMode(currentMode, false);
     }
 
-    async function openSettingsModal() {
+    async function openSettingsModal(initialTab = 'status') {
       const toast = document.getElementById('settings-toast');
       toast.innerText = '';
       
@@ -2246,10 +2303,13 @@
 
         populateSettingsModal(cfg);
 
-        // Open on Status tab by default
-        switchSettingsTab('status');
+        switchSettingsTab(initialTab);
 
-        document.getElementById('info-target-server').innerText = `${t('subbar.target_nut', 'Target NUT')}: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})`;
+        if (cfg.nut_configured) {
+          document.getElementById('info-target-server').innerText = `${t('subbar.target_nut', 'Target NUT')}: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})`;
+        } else {
+          document.getElementById('info-target-server').innerText = t('subbar.config_required', 'Configurazione NUT richiesta');
+        }
         document.getElementById('settings-modal').classList.add('active');
       } catch (err) {
         alert(t('toasts.alert_load_fail', 'Impossibile caricare le impostazioni: ') + err.message);
