@@ -72,6 +72,50 @@ class TestConfig(unittest.TestCase):
             self.assertEqual(cfg.get("poll_interval"), 5.0)
             self.assertTrue(cfg.reload_event.is_set())
 
+    def test_recovers_from_corrupted_primary_using_backup(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_file = os.path.join(tmpdir, "config.json")
+            backup_file = f"{config_file}.bak"
+            key_file = os.path.join(tmpdir, ".secret_key")
+
+            good_config = {
+                "nut_host": "10.10.10.10",
+                "nut_port": 3493,
+                "ups_name": "ups-backup",
+                "nut_user": "",
+                "nut_password_encrypted": "",
+                "dashboard_password_hash": "",
+                "poll_interval": 2.0,
+                "port": 8080,
+            }
+            with open(backup_file, "w", encoding="utf-8") as f:
+                json.dump(good_config, f)
+
+            with open(config_file, "w", encoding="utf-8") as f:
+                f.write("{ this is invalid json ")
+
+            cfg = ConfigManager(filepath=config_file, key_file=key_file)
+            self.assertEqual(cfg.get("nut_host"), "10.10.10.10")
+            self.assertEqual(cfg.get("ups_name"), "ups-backup")
+
+            with open(config_file, "r", encoding="utf-8") as f:
+                repaired_primary = json.load(f)
+            self.assertEqual(repaired_primary["nut_host"], "10.10.10.10")
+
+    def test_update_writes_backup_config(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config_file = os.path.join(tmpdir, "config.json")
+            backup_file = f"{config_file}.bak"
+            key_file = os.path.join(tmpdir, ".secret_key")
+
+            cfg = ConfigManager(filepath=config_file, key_file=key_file)
+            cfg.update({"nut_host": "192.168.50.5"})
+
+            self.assertTrue(os.path.isfile(backup_file))
+            with open(backup_file, "r", encoding="utf-8") as f:
+                backup_data = json.load(f)
+            self.assertEqual(backup_data["nut_host"], "192.168.50.5")
+
 
 if __name__ == "__main__":
     unittest.main()
