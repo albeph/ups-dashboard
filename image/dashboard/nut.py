@@ -4,7 +4,7 @@ import logging
 import re
 import socket
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, Optional
 
 logger = logging.getLogger("ups-dashboard.nut")
 
@@ -33,6 +33,7 @@ def format_ups_status(raw_status: str) -> str:
 
 
 _VAR_PATTERN = re.compile(r'^VAR\s+[^\s]+\s+[^\s]+\s+"?([^"\r\n]*)"?')
+_VAR_NAME_PATTERN = re.compile(r'^VAR\s+[^\s]+\s+([^\s]+)\s+"?([^"\r\n]*)"?')
 
 
 def parse_nut_var(line: str) -> Optional[str]:
@@ -70,6 +71,7 @@ class NutMetrics:
     ups_status: str
     ups_status_raw: str
     ups_model: str
+    raw_vars: Dict[str, str]
     error_message: str = ""
 
 
@@ -110,6 +112,24 @@ class NutClient:
                     res = sock_file.readline()
                     return parse_nut_var(res)
 
+                def query_all_vars() -> Dict[str, str]:
+                    cmd = f"LIST VAR {self.ups_name}\n"
+                    sock.sendall(cmd.encode("utf-8"))
+                    vars_map: Dict[str, str] = {}
+                    while True:
+                        line = sock_file.readline()
+                        if not line:
+                            break
+                        line = line.strip()
+                        if line.startswith("END LIST VAR"):
+                            break
+                        if line.startswith("ERR"):
+                            return {}
+                        match = _VAR_NAME_PATTERN.match(line)
+                        if match:
+                            vars_map[match.group(1)] = match.group(2)
+                    return vars_map
+
                 # Query key metrics
                 status_raw = query_var("ups.status")
                 model_raw = query_var("device.model") or query_var("ups.model")
@@ -119,6 +139,7 @@ class NutClient:
                 realpower_raw = query_var("ups.realpower") or query_var("output.realpower")
                 nominal_raw = query_var("ups.realpower.nominal") or query_var("output.realpower.nominal")
                 voltage_raw = query_var("input.voltage") or query_var("output.voltage")
+                raw_vars = query_all_vars()
 
                 # Send LOGOUT
                 try:
@@ -161,8 +182,8 @@ class NutClient:
                     ups_status=format_ups_status(status_raw or ""),
                     ups_status_raw=status_raw or "",
                     ups_model=model_full,
+                    raw_vars=raw_vars,
                     error_message="",
                 )
             finally:
                 sock_file.close()
-

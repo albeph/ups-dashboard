@@ -103,6 +103,7 @@ class TestAPI(unittest.TestCase):
             self.assertEqual(data["status"], "online")
             self.assertEqual(data["watts"], 120)
             self.assertFalse(data["auth_required"])
+            self.assertIn("nut_configured", data)
 
     def test_auth_flow(self):
         # Set a dashboard password
@@ -167,6 +168,17 @@ class TestAPI(unittest.TestCase):
             self.assertTrue(resp_data["success"])
             self.assertEqual(self.config.get("nut_host"), "192.168.1.55")
             self.assertEqual(self.config.get("poll_interval"), 3.5)
+
+        with urllib.request.urlopen(
+            urllib.request.Request(
+                f"{self.base_url}/api/settings",
+                headers={"Cookie": cookie_val},
+            )
+        ) as res:
+            self.assertEqual(res.status, 200)
+            settings_data = json.loads(res.read().decode())
+            self.assertIn("nut_raw_vars", settings_data)
+            self.assertIn("nut_configured", settings_data)
 
         # Logout
         logout_req = urllib.request.Request(

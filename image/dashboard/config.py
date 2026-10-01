@@ -165,6 +165,37 @@ class ConfigManager:
             return True
         return verify_password(candidate, dash_hash)
 
+    def is_nut_configured(self) -> bool:
+        """Returns True when NUT connection parameters are explicitly configured."""
+        with self.lock:
+            host = str(self.config.get("nut_host", "")).strip()
+            ups_name = str(self.config.get("ups_name", "")).strip()
+            nut_user = str(self.config.get("nut_user", "")).strip()
+            has_nut_password = bool(self.config.get("nut_password_encrypted", ""))
+
+        if not host or not ups_name:
+            return False
+
+        if os.path.isfile(self.filepath):
+            return True
+
+        env_nut_host = os.getenv("NUT_HOST", "").strip()
+        env_ups_name = os.getenv("UPS_NAME", "").strip()
+        env_nut_user = os.getenv("NUT_USER", "").strip()
+        env_nut_password = os.getenv("NUT_PASSWORD", "").strip()
+        env_nut_password_file = os.getenv("NUT_PASSWORD_FILE", "").strip()
+        env_has_password = bool(env_nut_password or env_nut_password_file)
+
+        if env_nut_host or env_ups_name or env_nut_user or env_has_password:
+            return True
+
+        return not (
+            host == DEFAULT_NUT_HOST
+            and ups_name == DEFAULT_UPS_NAME
+            and not nut_user
+            and not has_nut_password
+        )
+
     def get_all(self) -> Dict[str, Any]:
         with self.lock:
             return dict(self.config)

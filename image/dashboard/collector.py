@@ -25,6 +25,7 @@ class NUTDataCache:
         self.ups_status = "In connessione..."
         self.ups_status_raw = ""
         self.ups_model = ""
+        self.nut_raw_vars: Dict[str, str] = {}
         self.last_update: float = 0.0
         self.error_message = ""
 
@@ -40,6 +41,7 @@ class NUTDataCache:
             self.ups_status = metrics.ups_status
             self.ups_status_raw = metrics.ups_status_raw
             self.ups_model = metrics.ups_model
+            self.nut_raw_vars = dict(metrics.raw_vars or {})
             self.error_message = metrics.error_message
             self.last_update = time.time()
 
@@ -55,7 +57,24 @@ class NUTDataCache:
             self.ups_status = "Disconnesso"
             self.ups_status_raw = ""
             self.ups_model = ""
+            self.nut_raw_vars = {}
             self.error_message = error_message
+            self.last_update = time.time()
+
+    def update_unconfigured(self, message: str) -> None:
+        """Mark cache as waiting for initial NUT configuration."""
+        with self.lock:
+            self.status = "unconfigured"
+            self.watts = None
+            self.nominal_watts = None
+            self.load = 0
+            self.battery = 0
+            self.voltage = None
+            self.ups_status = "Configurazione richiesta"
+            self.ups_status_raw = ""
+            self.ups_model = ""
+            self.nut_raw_vars = {}
+            self.error_message = message
             self.last_update = time.time()
 
     def update(
@@ -70,6 +89,7 @@ class NUTDataCache:
         ups_model: str = "",
         error_message: str = "",
         nominal_watts: Optional[int] = None,
+        nut_raw_vars: Optional[Dict[str, str]] = None,
     ) -> None:
         """Backward-compatible update method."""
         with self.lock:
@@ -82,6 +102,7 @@ class NUTDataCache:
             self.ups_status = ups_status
             self.ups_status_raw = ups_status_raw
             self.ups_model = ups_model
+            self.nut_raw_vars = dict(nut_raw_vars or {})
             self.error_message = error_message
             self.last_update = time.time()
 
@@ -98,6 +119,7 @@ class NUTDataCache:
                 "ups_status": self.ups_status,
                 "ups_status_raw": self.ups_status_raw,
                 "ups_model": self.ups_model,
+                "nut_raw_vars": dict(self.nut_raw_vars),
                 "last_update": self.last_update,
                 "error_message": self.error_message,
             }
@@ -207,6 +229,14 @@ class NutPoller:
             ups_name = self.config.get("ups_name")
             nut_user = self.config.get("nut_user")
             nut_pwd = self.config.get_nut_password()
+
+            if not self.config.is_nut_configured():
+                self.cache.update_unconfigured(
+                    "Configurazione richiesta: apri Impostazioni e inserisci host, porta e nome UPS."
+                )
+                self.tracker.notify_poll_complete()
+                self.config.reload_event.wait(timeout=poll_int)
+                continue
 
             try:
                 client = NutClient(

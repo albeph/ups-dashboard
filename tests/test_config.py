@@ -6,6 +6,7 @@ import stat
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "image")))
 
@@ -20,11 +21,13 @@ class TestConfig(unittest.TestCase):
             config_file = os.path.join(tmpdir, "config.json")
             key_file = os.path.join(tmpdir, ".secret_key")
 
-            cfg = ConfigManager(filepath=config_file, key_file=key_file)
+            with patch.dict(os.environ, {}, clear=True):
+                cfg = ConfigManager(filepath=config_file, key_file=key_file)
             self.assertEqual(cfg.get("nut_host"), "127.0.0.1")
             self.assertEqual(cfg.get("nut_port"), 3493)
             self.assertEqual(cfg.get("ups_name"), "ups")
             self.assertFalse(cfg.is_auth_required())
+            self.assertFalse(cfg.is_nut_configured())
 
     def test_migration_of_plaintext_passwords(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -71,6 +74,7 @@ class TestConfig(unittest.TestCase):
             self.assertEqual(cfg.get("nut_host"), "10.0.0.5")
             self.assertEqual(cfg.get("poll_interval"), 5.0)
             self.assertTrue(cfg.reload_event.is_set())
+            self.assertTrue(cfg.is_nut_configured())
 
 
 if __name__ == "__main__":

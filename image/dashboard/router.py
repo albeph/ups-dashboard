@@ -135,6 +135,7 @@ class Router:
         data = self.cache.get_data()
         data.update({
             "auth_required": self.config.is_auth_required(),
+            "nut_configured": self.config.is_nut_configured(),
             "version": self.version,
             "nut_host": self.config.get("nut_host"),
             "nut_port": self.config.get("nut_port"),
@@ -161,12 +162,14 @@ class Router:
             "nut_user": current["nut_user"],
             "has_nut_password": bool(self.config.get_nut_password()),
             "has_dashboard_password": self.config.is_auth_required(),
+            "nut_configured": self.config.is_nut_configured(),
             "poll_interval": current["poll_interval"],
             "version": self.version,
             "server_status": telemetry["status"],
             "ups_status": telemetry.get("ups_status", ""),
             "ups_status_raw": telemetry.get("ups_status_raw", ""),
             "ups_model": telemetry.get("ups_model", ""),
+            "nut_raw_vars": telemetry.get("nut_raw_vars", {}),
             "error_message": telemetry.get("error_message", ""),
             "last_update": telemetry.get("last_update", 0),
             "load": telemetry.get("load", 0),

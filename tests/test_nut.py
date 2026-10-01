@@ -85,6 +85,7 @@ class TestNut(unittest.TestCase):
         self.assertEqual(metrics.voltage, 230.5)
         self.assertEqual(metrics.ups_model, "APC Smart-UPS 1500")
         self.assertEqual(metrics.ups_status, "Rete elettrica • In carica")
+        self.assertEqual(metrics.raw_vars, {})
 
 
 if __name__ == "__main__":
