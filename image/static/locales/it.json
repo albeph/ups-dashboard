@@ -29,7 +29,12 @@
     "feed_online": "Rete elettrica",
     "feed_battery": "Batteria",
     "feed_bypass": "Bypass",
-    "feed_disconnected": "Disconnesso"
+    "feed_disconnected": "Disconnesso",
+    "blackout_duration_label": "Durata Blackout",
+    "remaining_time_label": "Tempo Rimanente",
+    "shutdown_threshold_tooltip": "Limite per lo shutdown di tutte le macchine ({pct}%)",
+    "remaining_time_tooltip": "Calcolato dal valore stimato dall'UPS ({ups_rt}) meno la soglia di runtime minimo ({low_rt}). La durata è orientativa: il sistema potrebbe spegnersi prima se la batteria scende sotto la percentuale assegnata.",
+    "remaining_time_tooltip_no_low": "Valore stimato dall'UPS ({ups_rt}) — nessuna soglia di runtime minimo configurata. La durata è orientativa: il sistema potrebbe spegnersi prima se la batteria scende sotto la percentuale assegnata."
   },
   "subbar": {
     "target_nut": "Target NUT",
@@ -60,6 +65,8 @@
     "field_metrics": "Carico / Batteria",
     "field_refresh_rate": "Frequenza Refresh",
     "field_voltage": "Tensione di Rete",
+    "field_charge_low": "Soglia Carica Bassa",
+    "field_runtime_low": "Soglia Runtime Basso",
     "conn_online": "ONLINE",
     "conn_offline": "OFFLINE",
     "status_online": "IN LINEA (OL)",

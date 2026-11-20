@@ -2,7 +2,7 @@
   "id": "/",
   "name": "UPS Web Dashboard",
   "short_name": "UPS Dash",
-  "description": "Monitoraggio in tempo reale per Network UPS Tools (NUT)",
+  "description": "Real-time web dashboard for Network UPS Tools (NUT)",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="app-version" content="__APP_VERSION__">
   <title>UPS Web Dashboard</title>
 
   <!-- PWA & Mobile Web App Meta Tags -->
@@ -19,1068 +20,13 @@
   <link rel="icon" type="image/svg+xml" href="/icon.svg">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
   <link rel="shortcut icon" href="/favicon.ico">
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    html {
-      overflow-x: hidden;
-      max-width: 100vw;
-    }
 
-    body {
-      background-color: #0b0f19;
-      color: #e2e8f0;
-      min-height: 100vh;
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-      max-width: 100vw;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-    }
-
-    /* TOP BAR */
-    .top-bar {
-      width: 100%;
-      max-width: 100vw;
-      box-sizing: border-box;
-      background: #111827;
-      border-bottom: 1px solid #1f2937;
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
-
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      flex-shrink: 1;
-    }
-
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 9px;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      box-shadow: 0 0 12px rgba(2, 132, 199, 0.45);
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      font-size: 19px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      color: #f9fafb;
-      white-space: nowrap;
-    }
-
-    .version-badge {
-      font-size: 11.5px;
-      font-weight: 700;
-      background: #1f2937;
-      border: 1px solid #374151;
-      color: #38bdf8;
-      padding: 3px 8px;
-      border-radius: 999px;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .status-group {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      margin-left: 4px;
-      padding: 4px 10px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: 999px;
-      flex-shrink: 0;
-      transition: all 0.3s ease;
-    }
-
-    .status-group.offline {
-      background: rgba(239, 68, 68, 0.1);
-      border-color: rgba(239, 68, 68, 0.25);
-    }
-
-    .status-group.warning {
-      background: rgba(245, 158, 11, 0.1);
-      border-color: rgba(245, 158, 11, 0.25);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-      transition: all 0.3s ease;
-      flex-shrink: 0;
-    }
-
-    .status-dot.offline {
-      background: #ef4444;
-      box-shadow: 0 0 8px #ef4444;
-    }
-
-    .status-dot.warning {
-      background: #f59e0b;
-      box-shadow: 0 0 8px #f59e0b;
-    }
-
-    .status-text {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #10b981;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-
-    .status-text.offline {
-      color: #ef4444;
-    }
-
-    .status-text.warning {
-      color: #f59e0b;
-    }
-
-    /* TOP BAR ACTIONS */
-    .top-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .tab-group {
-      display: flex;
-      background: #1f2937;
-      padding: 3px;
-      border-radius: 8px;
-      border: 1px solid #374151;
-    }
-
-    .tab-btn {
-      background: transparent;
-      border: none;
-      color: #9ca3af;
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .tab-btn.active {
-      background: #0284c7;
-      color: #ffffff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .action-btn {
-      background: #1f2937;
-      border: 1px solid #374151;
-      color: #e5e7eb;
-      padding: 8px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 9px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .action-btn:hover {
-      background: #374151;
-      color: #ffffff;
-      border-color: #4b5563;
-    }
-
-    .action-btn:active {
-      transform: scale(0.97);
-    }
-
-    .action-btn.btn-lock {
-      display: none; /* Shown if auth required */
-      color: #38bdf8;
-    }
-
-    /* MAIN CONTENT */
-    .main-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 28px 20px;
-      max-width: 940px;
-      width: 100%;
-      margin: 0 auto;
-    }
-
-    .dashboard-panel {
-      width: 100%;
-      background: #111827;
-      border: 1px solid #1f2937;
-      border-radius: 20px;
-      padding: 26px 28px;
-      box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.6);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
-    }
-
-    .dash-col {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .dash-col .card {
-      flex: 1;
-    }
-
-    @media (max-width: 600px) {
-      .grid {
-        grid-template-columns: 1fr;
-        gap: 14px;
-      }
-      .brand-title {
-        display: none;
-      }
-      .top-bar {
-        padding: 10px 14px;
-      }
-      .action-btn {
-        padding: 8px 10px;
-        min-width: 38px;
-        height: 38px;
-        border-radius: 10px;
-      }
-      .action-btn .btn-text {
-        display: none;
-      }
-      .main-wrapper {
-        padding: 14px 10px;
-      }
-      .dashboard-panel {
-        padding: 16px 14px;
-        border-radius: 18px;
-      }
-      .card {
-        padding: 18px 16px !important;
-        min-height: auto !important;
-      }
-      .sub-card {
-        padding: 14px 16px !important;
-      }
-      .subbox-badge {
-        white-space: nowrap !important;
-        font-size: 14.5px !important;
-      }
-      .sub-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-        font-size: 12px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .version-badge {
-        display: none;
-      }
-      .status-group {
-        margin-left: 2px;
-        padding: 3px 8px;
-      }
-      .status-text {
-        font-size: 11.5px;
-      }
-      .modal-card {
-        padding: 18px 14px !important;
-      }
-      .form-row {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
-      }
-      .mode-options-grid {
-        grid-template-columns: 1fr !important;
-        gap: 10px !important;
-      }
-    }
-
-    .card {
-      background: rgba(31, 41, 55, 0.45);
-      border: 1px solid #374151;
-      border-radius: 16px;
-      padding: 22px 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 160px;
-      transition: border-color 0.3s ease;
-    }
-
-    .card:hover {
-      border-color: #4b5563;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13.5px;
-      text-transform: uppercase;
-      font-weight: 700;
-      letter-spacing: 0.6px;
-      color: #9ca3af;
-      margin-bottom: 14px;
-    }
-
-    .val-large {
-      font-size: 54px;
-      font-weight: 800;
-      color: #f9fafb;
-      line-height: 1;
-    }
-
-    .val-unit {
-      font-size: 22px;
-      font-weight: 700;
-      margin-left: 4px;
-    }
-
-    .unit-power { color: #38bdf8; }
-    .unit-batt { color: #34d399; }
-
-    /* Mode: Progress Bar */
-    .bar-mode {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .bar-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .progress-track {
-      flex: 1;
-      height: 11px;
-      background: #0f172a;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid #374151;
-    }
-
-    .progress-fill {
-      height: 100%;
-      border-radius: 999px;
-      transition: width 0.4s ease, background 0.4s ease;
-    }
-
-    .fill-power {
-      background: linear-gradient(90deg, #0284c7, #38bdf8);
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
-    }
-
-    .fill-batt {
-      background: linear-gradient(90deg, #059669, #34d399);
-      box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
-    }
-
-    .pct-label {
-      font-size: 17px;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      color: #f3f4f6;
-      min-width: 52px;
-      text-align: right;
-    }
-
-    /* Mode: Half-Circle Gauge */
-    .gauge-mode {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .gauge-container {
-      position: relative;
-      width: 105px;
-      height: 68px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .gauge-svg {
-      width: 105px;
-      height: 68px;
-    }
-
-    .gauge-bg {
-      fill: none;
-      stroke: #374151;
-      stroke-width: 8;
-      stroke-linecap: round;
-    }
-
-    .gauge-val {
-      fill: none;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-dasharray: 110;
-      stroke-dashoffset: 110;
-      transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
-    }
-
-    .gauge-power {
-      stroke: #38bdf8;
-      filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
-    }
-
-    .gauge-batt {
-      stroke: #34d399;
-      filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.5));
-    }
-
-    .gauge-text {
-      position: absolute;
-      bottom: 3px;
-      font-size: 17px;
-      font-weight: 800;
-      font-variant-numeric: tabular-nums;
-      color: #f9fafb;
-    }
-
-    /* SUB-BAR INFO */
-    .sub-bar {
-      margin-top: 22px;
-      padding-top: 16px;
-      border-top: 1px solid #1f2937;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      color: #9ca3af;
-    }
-
-    /* SETTINGS MODAL */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(11, 15, 25, 0.85);
-      backdrop-filter: blur(8px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 16px;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal-card {
-      background: #111827;
-      border: 1px solid #374151;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 550px;
-      max-height: calc(100dvh - 32px);
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      padding: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-      position: relative;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 14px;
-      border-bottom: 1px solid #1f2937;
-      margin-bottom: 16px;
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #f9fafb;
-    }
-
-    .close-btn {
-      background: transparent;
-      border: none;
-      color: #9ca3af;
-      font-size: 24px;
-      cursor: pointer;
-      line-height: 1;
-      padding: 4px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .close-btn:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    /* MODAL TABS - SCROLLABLE TABS */
-    .modal-tabs {
-      display: flex;
-      gap: 8px;
-      background: #0b0f19;
-      border: 1px solid #1f2937;
-      border-radius: 12px;
-      padding: 6px;
-      margin-bottom: 20px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      scroll-behavior: smooth;
-    }
-
-    .modal-tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .modal-tab-btn {
-      flex: 0 0 auto;
-      white-space: nowrap;
-      background: transparent;
-      border: 1px solid transparent;
-      color: #9ca3af;
-      padding: 8px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      transition: all 0.2s ease;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .modal-tab-btn:hover {
-      color: #f9fafb;
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .modal-tab-btn.active {
-      background: #1f2937;
-      color: #38bdf8;
-      border-color: rgba(56, 189, 248, 0.35);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    }
-
-    .tab-pane {
-      min-height: 200px;
-    }
-
-    /* MODE CARDS (ASPETTO TAB) */
-    .mode-options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
-    .mode-card {
-      background: #0b0f19;
-      border: 1px solid #1f2937;
-      border-radius: 12px;
-      padding: 14px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 10px;
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-
-    .mode-card:hover {
-      border-color: #374151;
-      background: #0e1526;
-    }
-
-    .mode-card.active {
-      border-color: #38bdf8;
-      background: rgba(2, 132, 199, 0.1);
-      box-shadow: 0 0 0 1px #38bdf8;
-    }
-
-    .mode-card-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .mode-radio {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      border: 2px solid #4b5563;
-      position: relative;
-      flex-shrink: 0;
-      transition: all 0.2s ease;
-    }
-
-    .mode-card.active .mode-radio {
-      border-color: #38bdf8;
-    }
-
-    .mode-card.active .mode-radio::after {
-      content: '';
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      background: #38bdf8;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .mode-title {
-      font-size: 13.5px;
-      font-weight: 700;
-      color: #f9fafb;
-    }
-
-    .mode-desc {
-      font-size: 12px;
-      color: #9ca3af;
-      line-height: 1.45;
-    }
-
-    .mode-preview-bar {
-      height: 6px;
-      background: #1f2937;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 4px;
-    }
-
-    .mode-preview-fill {
-      height: 100%;
-      width: 65%;
-      background: linear-gradient(90deg, #0284c7, #38bdf8);
-      border-radius: 999px;
-    }
-
-    .mode-preview-gauge {
-      display: flex;
-      justify-content: center;
-      margin-top: 4px;
-    }
-
-    /* SECURITY STATUS BANNER */
-    .security-status {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: #0b0f19;
-      border: 1px solid #1f2937;
-      border-radius: 10px;
-      font-size: 13px;
-      color: #9ca3af;
-    }
-
-    .security-status.protected {
-      color: #34d399;
-      border-color: rgba(52, 211, 153, 0.3);
-    }
-
-    /* STATUS TAB IN SETTINGS */
-    .status-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .status-card {
-      background: #0b0f19;
-      border: 1px solid #1f2937;
-      border-radius: 14px;
-      padding: 14px 16px;
-    }
-
-    .status-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #1f2937;
-    }
-
-    .status-title {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #38bdf8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    .status-pill.online {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(52, 211, 153, 0.3);
-    }
-
-    .status-pill.offline {
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    .status-pill.warning {
-      background: rgba(245, 158, 11, 0.15);
-      color: #f59e0b;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .status-content {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      padding: 3px 0;
-    }
-
-    .status-label {
-      color: #9ca3af;
-    }
-
-    .status-value {
-      color: #f9fafb;
-      font-weight: 600;
-    }
-
-    .status-error-box {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 12.5px;
-      margin-top: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .ups-state-badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(56, 189, 248, 0.12);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      margin-left: 6px;
-    }
-
-    .ups-state-badge.battery {
-      background: rgba(245, 158, 11, 0.15);
-      color: #f59e0b;
-      border-color: rgba(245, 158, 11, 0.3);
-    }
-
-    /* SEPARATE METRIC BOXES (TENSIONE & ALIMENTAZIONE SOTTO LE CARD) */
-    .sub-card {
-      background: rgba(31, 41, 55, 0.45);
-      border: 1px solid #374151;
-      border-radius: 16px;
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 60px;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .sub-card:hover {
-      border-color: #4b5563;
-      background: rgba(31, 41, 55, 0.65);
-    }
-
-    .subbox-label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13.5px;
-      font-weight: 700;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-
-    .subbox-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .subbox-badge.voltage {
-      color: #38bdf8;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
-
-    .subbox-badge.online {
-      color: #34d399;
-    }
-
-    .subbox-badge.battery {
-      color: #f59e0b;
-    }
-
-    .subbox-badge.offline {
-      color: #ef4444;
-    }
-
-    .poll-presets {
-      display: flex;
-      gap: 6px;
-    }
-
-    .preset-btn {
-      background: #0b0f19;
-      border: 1px solid #374151;
-      color: #9ca3af;
-      padding: 6px 11px;
-      font-size: 12.5px;
-      font-weight: 600;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .preset-btn:hover {
-      background: #1f2937;
-      color: #38bdf8;
-      border-color: #38bdf8;
-    }
-
-    .preset-btn.active {
-      background: #0284c7;
-      color: #ffffff;
-      border-color: #0284c7;
-    }
-
-    .form-section {
-      margin-bottom: 18px;
-    }
-
-    .section-label {
-      font-size: 12.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #38bdf8;
-      margin-bottom: 10px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .form-group label {
-      font-size: 12.5px;
-      color: #9ca3af;
-    }
-
-    .form-input {
-      background: #0b0f19;
-      border: 1px solid #374151;
-      color: #f9fafb;
-      padding: 10px 14px;
-      font-size: 16px; /* 16px impedisce l'auto-zoom di iOS Safari al focus */
-      border-radius: 9px;
-      outline: none;
-      transition: border-color 0.2s ease;
-    }
-
-    input, select, textarea {
-      font-size: 16px; /* Salvaguardia globale contro auto-zoom iOS */
-    }
-
-    .form-input:focus {
-      border-color: #38bdf8;
-    }
-
-    select.form-input {
-      cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 36px;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 22px;
-      padding-top: 16px;
-      border-top: 1px solid #1f2937;
-    }
-
-    .btn-save {
-      background: #0284c7;
-      color: white;
-      border: none;
-      padding: 9px 18px;
-      font-size: 13.5px;
-      font-weight: 700;
-      border-radius: 9px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .btn-save:hover {
-      background: #0369a1;
-    }
-
-    .btn-cancel {
-      background: transparent;
-      color: #9ca3af;
-      border: 1px solid #374151;
-      padding: 9px 16px;
-      font-size: 13.5px;
-      font-weight: 600;
-      border-radius: 9px;
-      cursor: pointer;
-    }
-
-    .btn-cancel:hover {
-      background: #1f2937;
-      color: #f9fafb;
-    }
-
-    .toast-msg {
-      font-size: 12.5px;
-      min-height: 18px;
-      margin-top: 8px;
-    }
-
-    /* LOCK SCREEN */
-    .lock-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(11, 15, 25, 0.95);
-      backdrop-filter: blur(10px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      padding: 20px;
-    }
-
-    .lock-overlay.active {
-      display: flex;
-    }
-
-    .lock-card {
-      background: #111827;
-      border: 1px solid #374151;
-      padding: 32px 28px;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.7);
-    }
-  </style>
+  <!-- Application Stylesheet (version-busted dynamically by the backend) -->
+  <link rel="stylesheet" href="/css/styles.css?v=__APP_VERSION__">
 </head>
 <body>
 
-  <!-- TOP BAR -->
+  <!-- Top Navigation Bar -->
   <header class="top-bar">
     <div class="brand-group">
       <div class="brand-icon">
@@ -1089,7 +35,7 @@
         </svg>
       </div>
       <span class="brand-title" data-i18n="topbar.brand_title">UPS Dashboard</span>
-      <span id="badge-version" class="version-badge">v1.0.0</span>
+      <span id="badge-version" class="version-badge">v--</span>
 
       <div id="conn-group" class="status-group">
         <div id="conn-dot" class="status-dot"></div>
@@ -1098,17 +44,17 @@
     </div>
 
     <div class="top-actions">
-      <!-- SETTINGS BUTTON -->
-      <button class="action-btn" onclick="openSettingsModal()" data-i18n-title="topbar.btn_settings_title" title="Impostazioni Server NUT e Dashboard" aria-label="Settings">
+      <!-- Settings Button -->
+      <button id="btn-open-settings" type="button" class="action-btn" data-i18n-title="topbar.btn_settings_title" title="NUT Server and Dashboard Settings" aria-label="Settings">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
-        <span class="btn-text" data-i18n="topbar.btn_settings">Impostazioni</span>
+        <span class="btn-text" data-i18n="topbar.btn_settings">Settings</span>
       </button>
 
-      <!-- LOCK / LOGOUT BUTTON -->
-      <button id="btn-lock" class="action-btn btn-lock" onclick="doLogout()" data-i18n-title="topbar.btn_lock_title" title="Blocca sessione" aria-label="Lock">
+      <!-- Session Lock / Logout Button -->
+      <button id="btn-lock" type="button" class="action-btn btn-lock" data-i18n-title="topbar.btn_lock_title" title="Lock session" aria-label="Lock">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -1118,22 +64,21 @@
     </div>
   </header>
 
-  <!-- MAIN DASHBOARD CONTENT -->
+  <!-- Main Dashboard Content -->
   <main class="main-wrapper">
     <div class="dashboard-panel">
-      
       <div class="grid">
-        
-        <!-- COLONNA SINISTRA: CONSUMO/CARICO & TENSIONE -->
+
+        <!-- Left Column: Power/Load, Mains Voltage, and Blackout Duration -->
         <div class="dash-col">
-          <!-- CARD 1: CONSUMO & CARICO -->
+          <!-- Card 1: Power & Load -->
           <div class="card">
             <div class="card-header">
-              <span id="title-card-power" data-i18n="cards.power_title_watts">Consumo & Carico</span>
-              <span id="label-load-status" style="color: #38bdf8;" data-i18n="cards.load_normal">Normale</span>
+              <span id="title-card-power" data-i18n="cards.power_title_watts">Power & Load</span>
+              <span id="label-load-status" style="color: #38bdf8;" data-i18n="cards.load_normal">Normal</span>
             </div>
 
-            <!-- Mode A: Progress Bar -->
+            <!-- Mode A: Horizontal Progress Bar -->
             <div id="power-view-bars" class="bar-mode">
               <div id="wrapper-watts-bars">
                 <span id="val-watts-bars" class="val-large">--</span>
@@ -1147,7 +92,7 @@
               </div>
             </div>
 
-            <!-- Mode B: Half-Circle Gauge -->
+            <!-- Mode B: Semicircle SVG Gauge -->
             <div id="power-view-gauge" class="gauge-mode" style="display: none;">
               <div id="wrapper-watts-gauge">
                 <span id="val-watts-gauge" class="val-large">--</span>
@@ -1163,42 +108,57 @@
             </div>
           </div>
 
-          <!-- BOX SEPARATO: TENSIONE SOTTO IL CONSUMO/UTILIZZO -->
+          <!-- Secondary Card: Mains / Output Voltage -->
           <div class="sub-card">
             <div class="subbox-label">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
               </svg>
-              <span data-i18n="cards.voltage_label">Tensione</span>
+              <span data-i18n="cards.voltage_label">Voltage</span>
             </div>
             <div id="subbox-voltage-val" class="subbox-badge voltage">-- V</div>
           </div>
+
+          <!-- Discharge-Only Card: Client-Side Blackout Duration -->
+          <div id="subcard-blackout" class="sub-card discharge-card">
+            <div class="subbox-label">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span data-i18n="cards.blackout_duration_label">Blackout Duration</span>
+            </div>
+            <div id="subbox-blackout-val" class="subbox-badge blackout">00:00</div>
+          </div>
         </div>
 
-        <!-- COLONNA DESTRA: STATO BATTERIA & ALIMENTAZIONE -->
+        <!-- Right Column: Battery Status, Power Source, and Remaining Runtime -->
         <div class="dash-col">
-          <!-- CARD 2: STATO BATTERIA -->
-          <div class="card">
+          <!-- Card 2: Battery Status -->
+          <div id="card-battery" class="card">
             <div class="card-header">
-              <span data-i18n="cards.battery_title">Stato Batteria</span>
-              <span id="label-batt-status" style="color: #34d399;" data-i18n="cards.battery_charged">Carica</span>
+              <span data-i18n="cards.battery_title">Battery Status</span>
+              <span id="label-batt-status" style="color: #34d399;" data-i18n="cards.battery_charged">Charged</span>
             </div>
 
-            <!-- Mode A: Progress Bar -->
+            <!-- Mode A: Horizontal Progress Bar -->
             <div id="batt-view-bars" class="bar-mode">
               <div>
                 <span id="val-batt-bars" class="val-large">--</span>
                 <span class="val-unit unit-batt">%</span>
               </div>
               <div class="bar-row">
-                <div class="progress-track">
-                  <div id="bar-batt-fill" class="progress-fill fill-batt" style="width: 0%;"></div>
+                <div class="progress-track-wrap">
+                  <div class="progress-track">
+                    <div id="bar-batt-fill" class="progress-fill fill-batt" style="width: 0%;"></div>
+                  </div>
+                  <div id="bar-batt-low-marker" class="batt-threshold-marker" role="img" tabindex="0" aria-label="Shutdown threshold"></div>
                 </div>
                 <span id="pct-batt-bars" class="pct-label">0%</span>
               </div>
             </div>
 
-            <!-- Mode B: Half-Circle Gauge -->
+            <!-- Mode B: Semicircle SVG Gauge -->
             <div id="batt-view-gauge" class="gauge-mode" style="display: none;">
               <div>
                 <span id="val-batt-gauge" class="val-large">--</span>
@@ -1208,236 +168,269 @@
                 <svg class="gauge-svg" viewBox="0 0 100 65">
                   <path class="gauge-bg" d="M 15 55 A 35 35 0 0 1 85 55" />
                   <path id="arc-batt" class="gauge-val gauge-batt" d="M 15 55 A 35 35 0 0 1 85 55" />
+                  <g id="gauge-batt-low-marker" class="gauge-threshold-group" tabindex="0" aria-label="Shutdown threshold">
+                    <line id="gauge-batt-low-hit" class="gauge-threshold-hit" x1="50" y1="20" x2="50" y2="20" />
+                    <line id="gauge-batt-low-line" class="gauge-threshold-line" x1="50" y1="20" x2="50" y2="20" />
+                  </g>
                 </svg>
                 <span id="pct-batt-gauge" class="gauge-text">0%</span>
               </div>
             </div>
           </div>
 
-          <!-- BOX SEPARATO: ALIMENTAZIONE SOTTO LA BATTERIA -->
+          <!-- Secondary Card: Active Power Source -->
           <div class="sub-card">
             <div class="subbox-label">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
                 <line x1="12" y1="2" x2="12" y2="12"></line>
               </svg>
-              <span data-i18n="cards.power_feed_label">Alimentazione</span>
+              <span data-i18n="cards.power_feed_label">Power Source</span>
             </div>
             <div id="subbox-mode-container" class="subbox-badge online">
               <span id="subbox-mode-dot" class="status-dot"></span>
-              <span id="subbox-mode-text" data-i18n="cards.feed_online">Rete elettrica</span>
+              <span id="subbox-mode-text" data-i18n="cards.feed_online">Utility Power</span>
             </div>
+          </div>
+
+          <!-- Discharge-Only Card: Usable Remaining Runtime -->
+          <div id="subcard-runtime" class="sub-card discharge-card interactive" tabindex="0" role="button">
+            <div class="subbox-label">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="18" height="10" rx="2" ry="2"></rect>
+                <line x1="22" y1="11" x2="22" y2="13"></line>
+                <line x1="6" y1="10" x2="6" y2="14"></line>
+                <line x1="10" y1="10" x2="10" y2="14"></line>
+              </svg>
+              <span data-i18n="cards.remaining_time_label">Remaining Time</span>
+              <svg class="info-hint-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </div>
+            <div id="subbox-runtime-val" class="subbox-badge runtime">--</div>
           </div>
         </div>
 
       </div>
 
-      <!-- SUB-BAR METADATA -->
+      <!-- Footer Metadata Bar -->
       <div class="sub-bar">
         <div>
           <span id="info-target-server">Target NUT: --</span>
         </div>
-        <div id="last-update-time" data-i18n="subbar.waiting_data">In attesa dati...</div>
+        <div id="last-update-time" data-i18n="subbar.waiting_data">Waiting for data...</div>
       </div>
-
     </div>
   </main>
 
-  <!-- SETTINGS MODAL -->
+  <!-- Settings Modal -->
   <div id="settings-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title" data-i18n="modal.title">Impostazioni Dashboard</h3>
-        <button class="close-btn" onclick="closeSettingsModal()">&times;</button>
+        <h3 class="modal-title" data-i18n="modal.title">Dashboard Settings</h3>
+        <button id="btn-close-settings" type="button" class="close-btn" aria-label="Close">&times;</button>
       </div>
 
-      <!-- MODAL TABS -->
+      <!-- Modal Tabs -->
       <div class="modal-tabs">
-        <button type="button" id="tab-btn-status" class="modal-tab-btn active" onclick="switchSettingsTab('status')">
+        <button type="button" id="tab-btn-status" class="modal-tab-btn active">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
           </svg>
-          <span data-i18n="modal.tab_status">Stato</span>
+          <span data-i18n="modal.tab_status">Status</span>
         </button>
-        <button type="button" id="tab-btn-nut" class="modal-tab-btn" onclick="switchSettingsTab('nut')">
+        <button type="button" id="tab-btn-nut" class="modal-tab-btn">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
             <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
             <line x1="6" y1="6" x2="6.01" y2="6"></line>
             <line x1="6" y1="18" x2="6.01" y2="18"></line>
           </svg>
-          <span data-i18n="modal.tab_nut">Server NUT</span>
+          <span data-i18n="modal.tab_nut">NUT Server</span>
         </button>
-        <button type="button" id="tab-btn-appearance" class="modal-tab-btn" onclick="switchSettingsTab('appearance')">
+        <button type="button" id="tab-btn-appearance" class="modal-tab-btn">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10"></path>
             <path d="M12 6v6l4 2"></path>
           </svg>
-          <span data-i18n="modal.tab_appearance">Aspetto</span>
+          <span data-i18n="modal.tab_appearance">Appearance</span>
         </button>
-        <button type="button" id="tab-btn-security" class="modal-tab-btn" onclick="switchSettingsTab('security')">
+        <button type="button" id="tab-btn-security" class="modal-tab-btn">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
-          <span data-i18n="modal.tab_security">Sicurezza</span>
+          <span data-i18n="modal.tab_security">Security</span>
         </button>
       </div>
 
-      <form id="settings-form" novalidate onsubmit="handleSaveSettings(event)">
-        
-        <!-- TAB 0: STATO -->
+      <form id="settings-form" novalidate>
+
+        <!-- Tab 0: Status -->
         <div id="tab-pane-status" class="tab-pane">
           <div class="status-grid">
-            
-            <!-- Connessione Server NUT -->
+            <!-- NUT Server Connection Card -->
             <div class="status-card">
               <div class="status-header">
-                <span class="status-title" data-i18n="tab_status.card_conn_title">Connessione Server NUT</span>
+                <span class="status-title" data-i18n="tab_status.card_conn_title">NUT Server Connection</span>
                 <span id="stat-pill-conn" class="status-pill online">ONLINE</span>
               </div>
               <div class="status-content">
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_host_port">Host & Porta</span>
+                  <span class="status-label" data-i18n="tab_status.field_host_port">Host & Port</span>
                   <span id="stat-val-target" class="status-value">--</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_ups_id">Identificativo UPS</span>
+                  <span class="status-label" data-i18n="tab_status.field_ups_id">UPS Identifier</span>
                   <span id="stat-val-ups" class="status-value">--</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_last_sync">Ultimo Sync</span>
+                  <span class="status-label" data-i18n="tab_status.field_last_sync">Last Sync</span>
                   <span id="stat-val-sync" class="status-value">--</span>
                 </div>
                 <div id="stat-box-error" class="status-error-box" style="display: none;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                  <span id="stat-msg-error">Errore di connessione</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  <span id="stat-msg-error">Connection error</span>
                 </div>
               </div>
             </div>
 
-            <!-- Stato Operativo Hardware UPS -->
+            <!-- UPS Operational Status Card -->
             <div class="status-card">
               <div class="status-header">
-                <span class="status-title" data-i18n="tab_status.card_ups_title">Stato Operativo UPS</span>
-                <span id="stat-pill-mode" class="status-pill online">IN LINEA (OL)</span>
+                <span class="status-title" data-i18n="tab_status.card_ups_title">UPS Operational Status</span>
+                <span id="stat-pill-mode" class="status-pill online">ONLINE (OL)</span>
               </div>
               <div class="status-content">
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_feed">Alimentazione</span>
-                  <span id="stat-val-mode" class="status-value">Rete elettrica</span>
+                  <span class="status-label" data-i18n="tab_status.field_feed">Power Source</span>
+                  <span id="stat-val-mode" class="status-value">Utility Power</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_model">Modello Rilevato</span>
+                  <span class="status-label" data-i18n="tab_status.field_model">Detected Model</span>
                   <span id="stat-val-model" class="status-value">--</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_max_watts">Potenza Massima</span>
+                  <span class="status-label" data-i18n="tab_status.field_max_watts">Max Power</span>
                   <span id="stat-val-maxwatts" class="status-value">-- W</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_metrics">Carico / Batteria</span>
+                  <span class="status-label" data-i18n="tab_status.field_metrics">Load / Battery</span>
                   <span id="stat-val-metrics" class="status-value">-- % / -- %</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_refresh_rate">Frequenza Refresh</span>
+                  <span class="status-label" data-i18n="tab_status.field_refresh_rate">Refresh Rate</span>
                   <span id="stat-val-poll" class="status-value">2.0s</span>
                 </div>
                 <div class="status-row">
-                  <span class="status-label" data-i18n="tab_status.field_voltage">Tensione di Rete</span>
+                  <span class="status-label" data-i18n="tab_status.field_voltage">Mains Voltage</span>
                   <span id="stat-val-voltage" class="status-value">-- V</span>
+                </div>
+                <div class="status-row">
+                  <span class="status-label" data-i18n="tab_status.field_charge_low">Low Charge Threshold</span>
+                  <span id="stat-val-charge-low" class="status-value">--</span>
+                </div>
+                <div class="status-row">
+                  <span class="status-label" data-i18n="tab_status.field_runtime_low">Low Runtime Threshold</span>
+                  <span id="stat-val-runtime-low" class="status-value">--</span>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
-        <!-- TAB 1: SERVER NUT -->
+        <!-- Tab 1: NUT Server -->
         <div id="tab-pane-nut" class="tab-pane" style="display: none;">
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_nut.section_conn_status">Stato Connessione Attuale</div>
+            <div class="section-label" data-i18n="tab_nut.section_conn_status">Current Connection Status</div>
             <div id="nut-status-banner" class="security-status">
               <span id="nut-status-dot" class="status-dot"></span>
-              <span id="nut-status-text">In attesa verifica...</span>
+              <span id="nut-status-text">Waiting for verification...</span>
             </div>
           </div>
+
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_nut.section_params">Parametri Connessione</div>
+            <div class="section-label" data-i18n="tab_nut.section_params">Connection Parameters</div>
             <div class="form-row">
               <div class="form-group">
-                <label for="cfg-host" data-i18n="tab_nut.label_host">Host o IP</label>
-                <input id="cfg-host" class="form-input" data-i18n-ph="tab_nut.ph_host" placeholder="es. 192.168.1.50">
+                <label for="cfg-host" data-i18n="tab_nut.label_host">Host or IP</label>
+                <input id="cfg-host" class="form-input" data-i18n-ph="tab_nut.ph_host" placeholder="e.g. 192.168.1.50">
               </div>
               <div class="form-group">
-                <label for="cfg-port" data-i18n="tab_nut.label_port">Porta TCP</label>
+                <label for="cfg-port" data-i18n="tab_nut.label_port">TCP Port</label>
                 <input id="cfg-port" type="number" class="form-input" placeholder="3493">
               </div>
             </div>
             <div class="form-group">
-              <label for="cfg-ups-name" data-i18n="tab_nut.label_ups_name">Nome UPS</label>
+              <label for="cfg-ups-name" data-i18n="tab_nut.label_ups_name">UPS Name</label>
               <input id="cfg-ups-name" class="form-input" data-i18n-ph="tab_nut.ph_ups_name" placeholder="ups">
             </div>
           </div>
 
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_nut.section_credentials">Credenziali Demone NUT (Opzionali)</div>
+            <div class="section-label" data-i18n="tab_nut.section_credentials">NUT Daemon Credentials (Optional)</div>
             <div class="form-row">
               <div class="form-group">
-                <label for="cfg-nut-user" data-i18n="tab_nut.label_nut_user">Username NUT</label>
-                <input id="cfg-nut-user" class="form-input" data-i18n-ph="tab_nut.ph_nut_user" placeholder="es. upsmon">
+                <label for="cfg-nut-user" data-i18n="tab_nut.label_nut_user">NUT Username</label>
+                <input id="cfg-nut-user" class="form-input" data-i18n-ph="tab_nut.ph_nut_user" placeholder="e.g. upsmon">
               </div>
               <div class="form-group">
-                <label for="cfg-nut-pwd" data-i18n="tab_nut.label_nut_pwd">Password NUT</label>
-                <input id="cfg-nut-pwd" type="password" class="form-input" placeholder="Lascia vuoto per non cambiare">
+                <label for="cfg-nut-pwd" data-i18n="tab_nut.label_nut_pwd">NUT Password</label>
+                <input id="cfg-nut-pwd" type="password" class="form-input" placeholder="Leave blank to keep unchanged">
               </div>
             </div>
           </div>
 
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_nut.section_polling">Frequenza di Aggiornamento</div>
+            <div class="section-label" data-i18n="tab_nut.section_polling">Update Frequency</div>
             <div class="form-group">
-              <label for="cfg-poll-interval" data-i18n="tab_nut.label_polling">Intervallo Aggiornamento Dati</label>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <input id="cfg-poll-interval" type="number" step="0.5" min="0.5" max="60" class="form-input" style="width: 85px; text-align: center;" placeholder="2.0" oninput="setPollInterval(this.value, false)">
-                <span data-i18n="tab_nut.unit_sec" style="font-size: 13px; color: #9ca3af;">sec</span>
+              <label for="cfg-poll-interval" data-i18n="tab_nut.label_polling">Data Polling Interval</label>
+              <div class="poll-control-row">
+                <input id="cfg-poll-interval" type="number" step="0.5" min="0.5" max="60" class="form-input poll-input" placeholder="2.0">
+                <span data-i18n="tab_nut.unit_sec" class="poll-unit">sec</span>
                 <div class="poll-presets">
-                  <button type="button" class="preset-btn" onclick="setPollInterval(1, true)">1s</button>
-                  <button type="button" class="preset-btn" onclick="setPollInterval(2, true)">2s</button>
-                  <button type="button" class="preset-btn" onclick="setPollInterval(5, true)">5s</button>
-                  <button type="button" class="preset-btn" onclick="setPollInterval(10, true)">10s</button>
+                  <button type="button" class="preset-btn" data-poll-preset="1">1s</button>
+                  <button type="button" class="preset-btn" data-poll-preset="2">2s</button>
+                  <button type="button" class="preset-btn" data-poll-preset="5">5s</button>
+                  <button type="button" class="preset-btn" data-poll-preset="10">10s</button>
                 </div>
               </div>
-              <span data-i18n="tab_nut.desc_polling" style="font-size: 12px; color: #6b7280; margin-top: 5px;">
-                Intervallo in secondi tra le interrogazioni al server NUT e il refresh a video (predefinito: 2s).
+              <span data-i18n="tab_nut.desc_polling" class="form-hint">
+                Interval in seconds between NUT server queries and UI refresh (default: 2s).
               </span>
             </div>
           </div>
         </div>
 
-        <!-- TAB 2: ASPETTO (SEMICERCHIO O BARRA & LINGUA) -->
+        <!-- Tab 2: Appearance (Display Style, Language & PWA) -->
         <div id="tab-pane-appearance" class="tab-pane" style="display: none;">
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_appearance.section_style">Stile Indicatori Telemetria</div>
+            <div class="section-label" data-i18n="tab_appearance.section_style">Telemetry Gauge Style</div>
             <div class="mode-options-grid">
-              <div id="opt-mode-bars" class="mode-card active" onclick="selectSettingsMode('bars')">
+              <div id="opt-mode-bars" class="mode-card active">
                 <div class="mode-card-header">
                   <div class="mode-radio"></div>
-                  <span class="mode-title" data-i18n="tab_appearance.mode_bars_title">Barre Orizzontali</span>
+                  <span class="mode-title" data-i18n="tab_appearance.mode_bars_title">Horizontal Bars</span>
                 </div>
-                <div class="mode-desc" data-i18n="tab_appearance.mode_bars_desc">Visualizzazione lineare e compatta con barre di riempimento a gradiente dinamico.</div>
+                <div class="mode-desc" data-i18n="tab_appearance.mode_bars_desc">Clean, linear visualization with dynamic gradient progress bars.</div>
                 <div class="mode-preview-bar">
                   <div class="mode-preview-fill"></div>
                 </div>
               </div>
 
-              <div id="opt-mode-gauge" class="mode-card" onclick="selectSettingsMode('gauge')">
+              <div id="opt-mode-gauge" class="mode-card">
                 <div class="mode-card-header">
                   <div class="mode-radio"></div>
-                  <span class="mode-title" data-i18n="tab_appearance.mode_gauge_title">Semicerchio (Gauge)</span>
+                  <span class="mode-title" data-i18n="tab_appearance.mode_gauge_title">Semicircle (Gauge)</span>
                 </div>
-                <div class="mode-desc" data-i18n="tab_appearance.mode_gauge_desc">Cruscotto grafico con indicatori circolari ad arco SVG ispirati a strumenti analogici.</div>
+                <div class="mode-desc" data-i18n="tab_appearance.mode_gauge_desc">Graphical dashboard with SVG circular arc dials inspired by analog meters.</div>
                 <div class="mode-preview-gauge">
                   <svg width="56" height="32" viewBox="0 0 100 55">
                     <path class="gauge-bg" d="M 15 50 A 35 35 0 0 1 85 50" />
@@ -1446,59 +439,58 @@
                 </div>
               </div>
             </div>
-            <div style="font-size: 12.5px; color: #6b7280; margin-top: 14px; text-align: center;" data-i18n="tab_appearance.mode_note">
-              La modalità scelta viene applicata immediatamente alla dashboard e memorizzata nel browser.
+            <div class="mode-note" data-i18n="tab_appearance.mode_note">
+              Selected mode is applied immediately and remembered in your browser.
             </div>
           </div>
 
-          <!-- LINGUA DELL'INTERFACCIA -->
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_appearance.section_lang">Lingua dell'Interfaccia</div>
+            <div class="section-label" data-i18n="tab_appearance.section_lang">Interface Language</div>
             <div class="form-group">
-              <select id="cfg-language" class="form-input" onchange="handleLanguageChange(this.value)">
-                <option value="auto" data-i18n="tab_appearance.lang_auto">🌐 Automatica (Riconosciuta dal browser)</option>
-                <option value="it">🇮🇹 Italiano</option>
+              <select id="cfg-language" class="form-input">
+                <option value="auto" data-i18n="tab_appearance.lang_auto">🌐 Automatic (Detected from browser)</option>
                 <option value="en">🇬🇧 English</option>
+                <option value="it">🇮🇹 Italiano</option>
               </select>
-              <span style="font-size: 12px; color: #6b7280; margin-top: 5px;" data-i18n="tab_appearance.lang_desc">
-                Seleziona la lingua preferita o usa l'impostazione automatica basata sul tuo browser.
+              <span class="form-hint" data-i18n="tab_appearance.lang_desc">
+                Select your preferred interface language or keep automatic browser detection.
               </span>
             </div>
           </div>
 
-          <!-- WEB APP (PWA) -->
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_appearance.section_pwa">Applicazione Web (PWA)</div>
-            <div style="background: #0b0f19; border: 1px solid #1f2937; border-radius: 12px; padding: 14px 16px; font-size: 12.5px; color: #9ca3af; line-height: 1.5;">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;">
-                <span style="color: #f9fafb; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 7px;">
-                  <span style="font-size: 16px;">⚡</span> <span data-i18n="tab_appearance.pwa_title">Web App Mobile & Desktop</span>
+            <div class="section-label" data-i18n="tab_appearance.section_pwa">Web App (PWA)</div>
+            <div class="pwa-info-card">
+              <div class="pwa-info-header">
+                <span class="pwa-info-title">
+                  <span style="font-size: 16px;">⚡</span>
+                  <span data-i18n="tab_appearance.pwa_title">Mobile & Desktop Web App</span>
                 </span>
-                <button type="button" id="btn-install-pwa" class="preset-btn active" style="display: none; padding: 5px 12px;" onclick="triggerPwaInstall()">
-                  <span data-i18n="tab_appearance.btn_install">Installa</span>
+                <button type="button" id="btn-install-pwa" class="preset-btn active pwa-install-btn">
+                  <span data-i18n="tab_appearance.btn_install">Install</span>
                 </button>
               </div>
               <div id="pwa-help-text" data-i18n-html="tab_appearance.pwa_desc">
-                Installa la dashboard come app a schermo intero sul tuo dispositivo: su <strong>iOS (Safari)</strong> tocca l'icona Condividi ⎋ e scegli <em>"Aggiungi a Home"</em>; su <strong>Android (Chrome)</strong> tocca il menu ⋮ e seleziona <em>"Installa app"</em>.
+                Install the dashboard as a standalone fullscreen app on your device: on <strong>iOS (Safari)</strong> tap the Share icon ⎋ and choose <em>"Add to Home Screen"</em>; on <strong>Android (Chrome)</strong> tap the menu ⋮ and select <em>"Install app"</em>.
               </div>
             </div>
           </div>
         </div>
 
-        <!-- TAB 3: SICUREZZA -->
+        <!-- Tab 3: Security -->
         <div id="tab-pane-security" class="tab-pane" style="display: none;">
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_security.section_auth_status">Stato Autenticazione Portale</div>
+            <div class="section-label" data-i18n="tab_security.section_auth_status">Dashboard Authentication Status</div>
             <div id="security-status-badge" class="security-status"></div>
           </div>
 
           <div class="form-section">
-            <div class="section-label" data-i18n="tab_security.section_update_pwd">Aggiorna Password Dashboard</div>
+            <div class="section-label" data-i18n="tab_security.section_update_pwd">Update Dashboard Password</div>
             <div class="form-group">
-              <label for="cfg-dash-pwd" data-i18n="tab_security.label_new_pwd">Nuova Password Dashboard</label>
-              <input id="cfg-dash-pwd" type="password" class="form-input" data-i18n-ph="tab_security.ph_new_pwd" placeholder="Lascia vuoto per mantenere l'attuale">
-              <span style="font-size: 12px; color: #6b7280; margin-top: 5px;" data-i18n="tab_security.pwd_note">
-                Cifratura irreversibile con PBKDF2-HMAC-SHA256 (100.000 iterazioni crittografiche).
+              <label for="cfg-dash-pwd" data-i18n="tab_security.label_new_pwd">New Dashboard Password</label>
+              <input id="cfg-dash-pwd" type="password" class="form-input" data-i18n-ph="tab_security.ph_new_pwd" placeholder="Leave blank to keep current password">
+              <span class="form-hint" data-i18n="tab_security.pwd_note">
+                Irreversible encryption using PBKDF2-HMAC-SHA256 (100,000 cryptographic iterations).
               </span>
             </div>
           </div>
@@ -1507,879 +499,32 @@
         <div id="settings-toast" class="toast-msg"></div>
 
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" onclick="closeSettingsModal()" data-i18n="modal.btn_cancel">Annulla</button>
-          <button type="submit" class="btn-save" data-i18n="modal.btn_save">Salva Modifiche</button>
+          <button id="btn-cancel-settings" type="button" class="btn-cancel" data-i18n="modal.btn_cancel">Cancel</button>
+          <button type="submit" class="btn-save" data-i18n="modal.btn_save">Save Changes</button>
         </div>
 
       </form>
     </div>
   </div>
 
-  <!-- PASSWORD LOCK OVERLAY -->
+  <!-- Password Lock Overlay -->
   <div id="lock-screen" class="lock-overlay">
     <div class="lock-card">
-      <div style="font-size: 32px; margin-bottom: 10px;">🔒</div>
-      <div style="font-size: 19px; font-weight: 700; color: #f9fafb;" data-i18n="lock_screen.title">Accesso Protetto</div>
-      <div style="font-size: 13px; color: #9ca3af; margin-top: 6px; margin-bottom: 16px;" data-i18n="lock_screen.desc">Inserisci la password per sbloccare la dashboard</div>
-      <form onsubmit="handleLogin(event)">
-        <input id="pwd-field" type="password" class="form-input" style="width: 100%; text-align: center; margin-bottom: 14px;" data-i18n-ph="lock_screen.ph_pwd" placeholder="Password..." autocomplete="current-password" required>
-        <button type="submit" class="btn-save" style="width: 100%; padding: 11px;" data-i18n="lock_screen.btn_login">Accedi</button>
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title" data-i18n="lock_screen.title">Protected Access</div>
+      <div class="lock-desc" data-i18n="lock_screen.desc">Enter password to unlock the dashboard</div>
+      <form id="login-form">
+        <input id="pwd-field" type="password" class="form-input lock-input" data-i18n-ph="lock_screen.ph_pwd" placeholder="Password..." autocomplete="current-password" required>
+        <button type="submit" class="btn-save lock-submit" data-i18n="lock_screen.btn_login">Sign In</button>
       </form>
-      <div id="login-error" style="color: #ef4444; font-size: 12.5px; margin-top: 10px; min-height: 18px;"></div>
+      <div id="login-error" class="lock-error"></div>
     </div>
   </div>
 
-  <script>
-    // ==========================================
-    // SELECTION-SAFE DOM HELPERS
-    // (Prevents periodic polling from disrupting active user text selection)
-    // ==========================================
-    function isNodeSelected(node) {
-      if (!node) return false;
-      const sel = window.getSelection();
-      if (!sel || sel.isCollapsed || sel.rangeCount === 0) return false;
-      try {
-        const range = sel.getRangeAt(0);
-        if (typeof range.intersectsNode === 'function') {
-          return range.intersectsNode(node);
-        }
-      } catch (e) {
-        // Fallback for exceptional nodes
-      }
-      return false;
-    }
-
-    function safeSetText(elOrId, text) {
-      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
-      if (!el) return;
-      const str = String(text ?? '');
-      if (el.textContent === str) return; // Do not touch DOM node if identical
-      if (isNodeSelected(el)) return;     // Do not interrupt active text selection
-      el.textContent = str;
-    }
-
-    function safeSetClass(elOrId, className) {
-      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
-      if (!el) return;
-      if (el.className !== className) {
-        el.className = className;
-      }
-    }
-
-    function safeSetStyle(elOrId, prop, value) {
-      const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
-      if (!el) return;
-      if (el.style[prop] !== value) {
-        el.style[prop] = value;
-      }
-    }
-
-    // ==========================================
-    // 1. I18N (INTERNATIONALIZATION) MODULE
-    // ==========================================
-    let currentLangSetting = localStorage.getItem('ups_language') || 'auto';
-    let activeLangCode = 'en';
-    let availableLocales = [
-      { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-      { code: 'en', name: 'English', flag: '🇬🇧' }
-    ];
-    let loadedLocales = {};
-    let lastStatsData = null;
-    let lastSettingsData = null;
-
-    // Detect browser language (ISO 639-1 code)
-    function getBrowserLanguage() {
-      const navLang = navigator.language || navigator.userLanguage || 'en';
-      return navLang.split('-')[0].toLowerCase();
-    }
-
-    // Traverse dot-separated paths in an object
-    function getKeyValue(obj, path) {
-      if (!obj || !path) return null;
-      const parts = path.split('.');
-      let cur = obj;
-      for (const p of parts) {
-        if (cur && typeof cur === 'object' && p in cur) {
-          cur = cur[p];
-        } else {
-          return null;
-        }
-      }
-      return typeof cur === 'string' ? cur : null;
-    }
-
-    // Translate string with fallback to English
-    function t(key, fallback = '') {
-      let val = null;
-      if (loadedLocales[activeLangCode]) {
-        val = getKeyValue(loadedLocales[activeLangCode], key);
-      }
-      if (val === null && loadedLocales['en']) {
-        val = getKeyValue(loadedLocales['en'], key);
-      }
-      return val !== null ? val : (fallback || key);
-    }
-
-    // HTML sanitizer to prevent XSS
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    // Translate UPS status code(s)
-    function translateUpsStatus(rawStatus) {
-      if (!rawStatus) return t('cards.feed_online', 'Rete elettrica');
-      const curMap = loadedLocales[activeLangCode]?.ups_status_map || {};
-      const enMap = loadedLocales['en']?.ups_status_map || {};
-      const map = Object.assign({}, enMap, curMap);
-      if (map[rawStatus]) return map[rawStatus];
-
-      const parts = rawStatus.split(/\s+/);
-      const translated = parts.map(p => map[p] || p);
-      return translated.join(' • ');
-    }
-
-    // Fetch and cache locale JSON
-    async function loadLocale(code) {
-      if (loadedLocales[code]) return loadedLocales[code];
-      try {
-        const res = await fetch('/locales/' + code + '.json');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        loadedLocales[code] = data;
-        return data;
-      } catch (err) {
-        console.warn('Could not load locale ' + code + ':', err);
-        return null;
-      }
-    }
-
-    // Apply translations to all data-i18n attributes
-    function applyTranslations() {
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        const translated = t(key);
-        if (translated) el.innerText = translated;
-      });
-
-      document.querySelectorAll('[data-i18n-html]').forEach(el => {
-        const key = el.getAttribute('data-i18n-html');
-        const translated = t(key);
-        if (translated) el.innerHTML = translated;
-      });
-
-      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-        const key = el.getAttribute('data-i18n-ph');
-        const translated = t(key);
-        if (translated) el.placeholder = translated;
-      });
-
-      document.querySelectorAll('[data-i18n-title]').forEach(el => {
-        const key = el.getAttribute('data-i18n-title');
-        const translated = t(key);
-        if (translated) el.title = translated;
-      });
-
-      document.documentElement.lang = activeLangCode;
-    }
-
-    // Switch and apply language
-    async function setLanguage(langCode, save = true) {
-      if (save) {
-        localStorage.setItem('ups_language', langCode);
-        currentLangSetting = langCode;
-      }
-
-      let targetCode = 'en';
-      if (langCode === 'auto') {
-        const bLang = getBrowserLanguage();
-        const found = availableLocales.some(l => l.code === bLang);
-        targetCode = found ? bLang : 'en';
-      } else {
-        targetCode = langCode;
-      }
-
-      activeLangCode = targetCode;
-
-      // Always load English for fallback
-      if (!loadedLocales['en']) {
-        await loadLocale('en');
-      }
-
-      // Load target if not loaded
-      if (activeLangCode !== 'en' && !loadedLocales[activeLangCode]) {
-        await loadLocale(activeLangCode);
-      }
-
-      const sel = document.getElementById('cfg-language');
-      if (sel) {
-        sel.value = currentLangSetting;
-      }
-
-      applyTranslations();
-
-      if (lastStatsData) {
-        updateUI(lastStatsData);
-      }
-      if (lastSettingsData && document.getElementById('settings-modal').classList.contains('active')) {
-        populateSettingsModal(lastSettingsData);
-      }
-    }
-
-    function handleLanguageChange(val) {
-      setLanguage(val, true);
-    }
-
-    async function initLocales() {
-      try {
-        const res = await fetch('/api/locales');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.locales) && data.locales.length > 0) {
-            availableLocales = data.locales;
-          }
-        }
-      } catch (e) {
-        console.warn('Using default locales list:', e);
-      }
-
-      const sel = document.getElementById('cfg-language');
-      if (sel) {
-        sel.innerHTML = '';
-        const autoOpt = document.createElement('option');
-        autoOpt.value = 'auto';
-        autoOpt.setAttribute('data-i18n', 'tab_appearance.lang_auto');
-        autoOpt.textContent = '🌐 Automatica (Riconosciuta dal browser)';
-        sel.appendChild(autoOpt);
-
-        availableLocales.forEach(loc => {
-          const opt = document.createElement('option');
-          opt.value = loc.code;
-          opt.textContent = `${loc.flag} ${loc.name}`;
-          sel.appendChild(opt);
-        });
-
-        sel.value = currentLangSetting;
-      }
-
-      await setLanguage(currentLangSetting, false);
-    }
-
-    // ==========================================
-    // 2. VIEW MODE & DISPLAY
-    // ==========================================
-    let currentMode = localStorage.getItem('ups_view_mode') || 'bars';
-    switchMode(currentMode, false);
-
-    function switchMode(mode, save = true) {
-      currentMode = mode;
-      if (save) localStorage.setItem('ups_view_mode', mode);
-
-      const isBars = mode === 'bars';
-
-      const optBars = document.getElementById('opt-mode-bars');
-      const optGauge = document.getElementById('opt-mode-gauge');
-      if (optBars) optBars.classList.toggle('active', isBars);
-      if (optGauge) optGauge.classList.toggle('active', !isBars);
-
-      document.getElementById('power-view-bars').style.display = isBars ? 'flex' : 'none';
-      document.getElementById('power-view-gauge').style.display = isBars ? 'none' : 'flex';
-
-      document.getElementById('batt-view-bars').style.display = isBars ? 'flex' : 'none';
-      document.getElementById('batt-view-gauge').style.display = isBars ? 'none' : 'flex';
-    }
-
-    function selectSettingsMode(mode) {
-      switchMode(mode, true);
-    }
-
-    // ==========================================
-    // 3. POLLING & SETTINGS TABS
-    // ==========================================
-    function setPollInterval(sec, updateInput = true) {
-      const s = parseFloat(sec);
-      if (updateInput && !isNaN(s)) {
-        document.getElementById('cfg-poll-interval').value = s;
-      }
-      document.querySelectorAll('.preset-btn').forEach(btn => {
-        btn.classList.toggle('active', parseFloat(btn.innerText) === s);
-      });
-    }
-
-    let currentPollIntervalMs = 2000;
-    let pollTimerId = null;
-
-    function restartPolling(seconds) {
-      const s = parseFloat(seconds);
-      if (!isNaN(s) && s >= 0.5) {
-        currentPollIntervalMs = Math.round(s * 1000);
-      }
-      if (pollTimerId) clearInterval(pollTimerId);
-      pollTimerId = setInterval(fetchStats, currentPollIntervalMs);
-    }
-
-    function switchSettingsTab(tabName) {
-      const tabs = ['status', 'nut', 'appearance', 'security'];
-      tabs.forEach(t => {
-        const btn = document.getElementById('tab-btn-' + t);
-        const pane = document.getElementById('tab-pane-' + t);
-        const isActive = (t === tabName);
-        if (btn) {
-          btn.classList.toggle('active', isActive);
-          if (isActive) {
-            btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-          }
-        }
-        if (pane) pane.style.display = isActive ? 'block' : 'none';
-      });
-    }
-
-    // ==========================================
-    // 4. MAIN UI UPDATER
-    // ==========================================
-    function updateUI(data) {
-      lastStatsData = data;
-      const isOnline = data.status === 'online';
-      
-      // Update Version
-      if (data.version) {
-        safeSetText('badge-version', 'v' + data.version);
-      }
-
-      // Connection Status & UPS State
-      const dot = document.getElementById('conn-dot');
-      const connText = document.getElementById('conn-text');
-      const connGroup = document.getElementById('conn-group');
-      const isBattery = data.ups_status_raw && data.ups_status_raw.includes('OB');
-
-      // Target NUT info
-      if (data.nut_host && data.nut_port) {
-        const ups = data.ups_name ? ` (${data.ups_name})` : '';
-        safeSetText('info-target-server', `${t('subbar.target_nut', 'Target NUT')}: ${data.nut_host}:${data.nut_port}${ups}`);
-      }
-
-      if (!isOnline) {
-        if (connGroup) safeSetClass(connGroup, 'status-group offline');
-        safeSetClass(dot, 'status-dot offline');
-        safeSetClass(connText, 'status-text offline');
-        safeSetText(connText, t('topbar.status_offline', 'Offline'));
-        safeSetText('last-update-time', data.error_message ? (t('subbar.error_prefix', 'Errore: ') + data.error_message) : t('subbar.nut_unreachable', 'Server NUT non raggiungibile'));
-        safeSetText('subbox-voltage-val', '-- V');
-        safeSetClass('subbox-mode-container', 'subbox-badge offline');
-        safeSetText('subbox-mode-text', t('cards.feed_disconnected', 'Disconnesso'));
-        safeSetClass('subbox-mode-dot', 'status-dot offline');
-        return;
-      }
-
-      const displayUpsStatus = translateUpsStatus(data.ups_status_raw || data.ups_status || (isBattery ? 'OB' : 'OL'));
-
-      if (isBattery) {
-        if (connGroup) safeSetClass(connGroup, 'status-group warning');
-        safeSetClass(dot, 'status-dot warning');
-        safeSetClass(connText, 'status-text warning');
-        safeSetText(connText, t('topbar.status_battery', 'Su Batteria (OB)'));
-      } else {
-        if (connGroup) safeSetClass(connGroup, 'status-group');
-        safeSetClass(dot, 'status-dot');
-        safeSetClass(connText, 'status-text');
-        safeSetText(connText, t('topbar.status_online', 'Online'));
-      }
-
-      // Watts
-      const hasWatts = data.watts !== null && data.watts !== undefined;
-      const titlePower = document.getElementById('title-card-power');
-      const wrapWattsBars = document.getElementById('wrapper-watts-bars');
-      const wrapWattsGauge = document.getElementById('wrapper-watts-gauge');
-      const powerViewGauge = document.getElementById('power-view-gauge');
-
-      if (hasWatts) {
-        safeSetText(titlePower, t('cards.power_title_watts', 'Consumo & Carico'));
-        safeSetStyle(wrapWattsBars, 'display', 'block');
-        safeSetStyle(wrapWattsGauge, 'display', 'block');
-        safeSetStyle(powerViewGauge, 'justifyContent', 'space-between');
-        safeSetText('val-watts-bars', data.watts);
-        safeSetText('val-watts-gauge', data.watts);
-      } else {
-        safeSetText(titlePower, t('cards.power_title_load', 'Carico UPS'));
-        safeSetStyle(wrapWattsBars, 'display', 'none');
-        safeSetStyle(wrapWattsGauge, 'display', 'none');
-        safeSetStyle(powerViewGauge, 'justifyContent', 'center');
-      }
-
-      // Load %
-      const load = Math.min(100, Math.max(0, data.load || 0));
-      safeSetText('pct-load-bars', load + '%');
-      safeSetText('pct-load-gauge', load + '%');
-
-      const barLoad = document.getElementById('bar-load-fill');
-      if (barLoad) safeSetStyle(barLoad, 'width', load + '%');
-
-      const arcLoad = document.getElementById('arc-load');
-      const offsetLoad = 110 - (110 * (load / 100));
-      if (arcLoad) {
-        arcLoad.style.strokeDashoffset = String(offsetLoad);
-      }
-
-      const loadStatus = document.getElementById('label-load-status');
-      if (load > 85) {
-        safeSetText(loadStatus, t('cards.load_overload', 'Sovraccarico'));
-        safeSetStyle(loadStatus, 'color', '#ef4444');
-        if (barLoad) safeSetStyle(barLoad, 'background', '#ef4444');
-        if (arcLoad) safeSetStyle(arcLoad, 'stroke', '#ef4444');
-      } else if (load > 60) {
-        safeSetText(loadStatus, t('cards.load_high', 'Elevato'));
-        safeSetStyle(loadStatus, 'color', '#f59e0b');
-        if (barLoad) safeSetStyle(barLoad, 'background', '#f59e0b');
-        if (arcLoad) safeSetStyle(arcLoad, 'stroke', '#f59e0b');
-      } else {
-        safeSetText(loadStatus, t('cards.load_normal', 'Normale'));
-        safeSetStyle(loadStatus, 'color', '#38bdf8');
-        if (barLoad) safeSetStyle(barLoad, 'background', 'linear-gradient(90deg, #0284c7, #38bdf8)');
-        if (arcLoad) safeSetStyle(arcLoad, 'stroke', '#38bdf8');
-      }
-
-      // Battery %
-      const batt = Math.min(100, Math.max(0, data.battery || 0));
-      safeSetText('val-batt-bars', batt);
-      safeSetText('val-batt-gauge', batt);
-      safeSetText('pct-batt-bars', batt + '%');
-      safeSetText('pct-batt-gauge', batt + '%');
-
-      const barBatt = document.getElementById('bar-batt-fill');
-      if (barBatt) safeSetStyle(barBatt, 'width', batt + '%');
-
-      const arcBatt = document.getElementById('arc-batt');
-      const offsetBatt = 110 - (110 * (batt / 100));
-      if (arcBatt) {
-        arcBatt.style.strokeDashoffset = String(offsetBatt);
-      }
-
-      const battStatus = document.getElementById('label-batt-status');
-      if (batt <= 20) {
-        safeSetText(battStatus, t('cards.battery_critical', 'Critica'));
-        safeSetStyle(battStatus, 'color', '#ef4444');
-        if (barBatt) safeSetStyle(barBatt, 'background', '#ef4444');
-        if (arcBatt) safeSetStyle(arcBatt, 'stroke', '#ef4444');
-      } else if (batt <= 50) {
-        safeSetText(battStatus, t('cards.battery_medium', 'Media'));
-        safeSetStyle(battStatus, 'color', '#f59e0b');
-        if (barBatt) safeSetStyle(barBatt, 'background', '#f59e0b');
-        if (arcBatt) safeSetStyle(arcBatt, 'stroke', '#f59e0b');
-      } else {
-        safeSetText(battStatus, t('cards.battery_charged', 'Carica'));
-        safeSetStyle(battStatus, 'color', '#34d399');
-        if (barBatt) safeSetStyle(barBatt, 'background', 'linear-gradient(90deg, #059669, #34d399)');
-        if (arcBatt) safeSetStyle(arcBatt, 'stroke', '#34d399');
-      }
-
-      // Valore tensione nel box sotto l'utilizzo
-      if (isOnline && data.voltage !== null && data.voltage !== undefined) {
-        const vNum = Number(data.voltage);
-        safeSetText('subbox-voltage-val', (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V');
-      } else {
-        safeSetText('subbox-voltage-val', isOnline ? '-- V' : '--');
-      }
-
-      // Stato alimentazione nel box sotto la percentuale di batteria
-      if (isBattery) {
-        safeSetClass('subbox-mode-container', 'subbox-badge battery');
-        safeSetText('subbox-mode-text', t('cards.feed_battery', 'Batteria'));
-        safeSetClass('subbox-mode-dot', 'status-dot warning');
-      } else if (data.ups_status_raw && data.ups_status_raw.includes('BYPASS')) {
-        safeSetClass('subbox-mode-container', 'subbox-badge warning');
-        safeSetText('subbox-mode-text', t('cards.feed_bypass', 'Bypass'));
-        safeSetClass('subbox-mode-dot', 'status-dot warning');
-      } else {
-        safeSetClass('subbox-mode-container', 'subbox-badge online');
-        safeSetText('subbox-mode-text', t('cards.feed_online', 'Rete elettrica'));
-        safeSetClass('subbox-mode-dot', 'status-dot');
-      }
-
-      // Se presente potenza nominale, sincronizza il campo nel tab Stato
-      if (data.nominal_watts) {
-        safeSetText('stat-val-maxwatts', `${data.nominal_watts} W`);
-      }
-
-      // Timestamp
-      const now = new Date();
-      safeSetText('last-update-time', t('subbar.last_update', 'Ultimo aggiornamento: ') + now.toLocaleTimeString());
-
-      // Show Lock button if server requires password
-      if (data.auth_required) {
-        safeSetStyle('btn-lock', 'display', 'flex');
-      }
-    }
-
-    async function fetchStats() {
-      try {
-        const res = await fetch('/api/stats');
-        if (res.status === 401) {
-          if (pollTimerId) {
-            clearInterval(pollTimerId);
-            pollTimerId = null;
-          }
-          showLockScreen();
-          return;
-        }
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        hideLockScreen();
-        if (data.poll_interval && typeof data.poll_interval === 'number') {
-          const expectedMs = Math.round(data.poll_interval * 1000);
-          if (expectedMs !== currentPollIntervalMs) {
-            restartPolling(data.poll_interval);
-          }
-        }
-        updateUI(data);
-      } catch (err) {
-        updateUI({ status: 'offline', watts: null, load: 0, battery: 0 });
-      }
-    }
-
-    // ==========================================
-    // 5. LOCK SCREEN & AUTH
-    // ==========================================
-    function showLockScreen() {
-      document.getElementById('lock-screen').classList.add('active');
-      document.getElementById('btn-lock').style.display = 'none';
-      document.getElementById('pwd-field').focus();
-    }
-
-    function hideLockScreen() {
-      document.getElementById('lock-screen').classList.remove('active');
-      document.getElementById('login-error').innerText = '';
-    }
-
-    async function handleLogin(e) {
-      e.preventDefault();
-      const pwd = document.getElementById('pwd-field').value;
-      const errorDiv = document.getElementById('login-error');
-      errorDiv.innerText = '';
-
-      try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: pwd })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          document.getElementById('pwd-field').value = '';
-          hideLockScreen();
-          fetchStats();
-          restartPolling(currentPollIntervalMs / 1000);
-        } else {
-          errorDiv.innerText = data.error || t('lock_screen.err_wrong_pwd', 'Password errata');
-        }
-      } catch (err) {
-        errorDiv.innerText = t('lock_screen.err_conn', 'Errore di connessione al server');
-      }
-    }
-
-    async function doLogout() {
-      try {
-        await fetch('/api/logout', { method: 'POST' });
-      } catch (e) {}
-      if (pollTimerId) {
-        clearInterval(pollTimerId);
-        pollTimerId = null;
-      }
-      showLockScreen();
-    }
-
-    // ==========================================
-    // 6. SETTINGS MODAL & FORM
-    // ==========================================
-    function populateSettingsModal(cfg) {
-      lastSettingsData = cfg;
-      document.getElementById('cfg-host').value = cfg.nut_host || '';
-      document.getElementById('cfg-port').value = cfg.nut_port || 3493;
-      document.getElementById('cfg-ups-name').value = cfg.ups_name || 'ups';
-      document.getElementById('cfg-nut-user').value = cfg.nut_user || '';
-      
-      const pollSec = cfg.poll_interval || 2.0;
-      setPollInterval(pollSec, true);
-
-      const nutPwdInput = document.getElementById('cfg-nut-pwd');
-      if (cfg.has_nut_password) {
-        nutPwdInput.placeholder = t('tab_nut.ph_nut_pwd_set', '•••••••• (già impostata)');
-      } else {
-        nutPwdInput.placeholder = t('tab_nut.ph_nut_pwd_unset', 'Nessuna password impostata');
-      }
-
-      // Populate Status tab
-      const isOnline = cfg.server_status === 'online';
-      const isBattery = cfg.ups_status_raw && cfg.ups_status_raw.includes('OB');
-
-      const pillConn = document.getElementById('stat-pill-conn');
-      if (pillConn) {
-        safeSetClass(pillConn, isOnline ? 'status-pill online' : 'status-pill offline');
-        safeSetText(pillConn, isOnline ? t('tab_status.conn_online', 'ONLINE') : t('tab_status.conn_offline', 'OFFLINE'));
-      }
-      safeSetText('stat-val-target', `${cfg.nut_host}:${cfg.nut_port}`);
-      safeSetText('stat-val-ups', cfg.ups_name || 'ups');
-      
-      const syncTime = cfg.last_update ? new Date(cfg.last_update * 1000).toLocaleTimeString() : t('tab_status.waiting', 'In attesa...');
-      safeSetText('stat-val-sync', syncTime);
-
-      const errBox = document.getElementById('stat-box-error');
-      if (errBox) {
-        if (!isOnline && cfg.error_message) {
-          errBox.style.display = 'flex';
-          safeSetText('stat-msg-error', cfg.error_message);
-        } else {
-          errBox.style.display = 'none';
-        }
-      }
-
-      const pillMode = document.getElementById('stat-pill-mode');
-      if (pillMode) {
-        if (!isOnline) {
-          safeSetClass(pillMode, 'status-pill offline');
-          safeSetText(pillMode, t('tab_status.status_offline', 'OFFLINE'));
-        } else if (isBattery) {
-          safeSetClass(pillMode, 'status-pill warning');
-          safeSetText(pillMode, t('tab_status.status_battery', 'SU BATTERIA (OB)'));
-        } else {
-          safeSetClass(pillMode, 'status-pill online');
-          safeSetText(pillMode, t('tab_status.status_online', 'IN LINEA (OL)'));
-        }
-      }
-
-      let feedText = t('cards.feed_online', 'Rete elettrica');
-      if (!isOnline) {
-        feedText = t('subbar.nut_unreachable', 'Server NUT non raggiungibile');
-      } else if (isBattery) {
-        feedText = t('cards.feed_battery', 'Batteria');
-      } else if (cfg.ups_status_raw && cfg.ups_status_raw.includes('BYPASS')) {
-        feedText = t('cards.feed_bypass', 'Bypass');
-      }
-      safeSetText('stat-val-mode', feedText);
-      safeSetText('stat-val-model', cfg.ups_model || t('tab_status.model_generic', 'Non rilevato o generico'));
-      safeSetText('stat-val-maxwatts', (isOnline && cfg.nominal_watts) ? `${cfg.nominal_watts} W` : '--');
-      
-      const metricsTpl = t('tab_status.metrics_unit', '{load}% carico • {batt}% batteria');
-      const metricsStr = isOnline ? metricsTpl.replace('{load}', cfg.load || 0).replace('{batt}', cfg.battery || 0) : '--';
-      safeSetText('stat-val-metrics', metricsStr);
-
-      safeSetText('stat-val-poll', `${pollSec}s`);
-
-      if (isOnline && cfg.voltage !== null && cfg.voltage !== undefined) {
-        const vNum = Number(cfg.voltage);
-        safeSetText('stat-val-voltage', (vNum % 1 === 0 ? Math.round(vNum) : vNum.toFixed(1)) + ' V');
-      } else {
-        safeSetText('stat-val-voltage', isOnline ? '-- V' : '--');
-      }
-
-      // Server NUT tab banner
-      const nutBanner = document.getElementById('nut-status-banner');
-      if (nutBanner) {
-        if (isOnline) {
-          nutBanner.className = 'security-status protected';
-          nutBanner.style.color = '#34d399';
-          nutBanner.style.borderColor = 'rgba(52, 211, 153, 0.3)';
-          nutBanner.innerHTML = `
-            <span class="status-dot"></span>
-            <span><strong>${escapeHtml(t('tab_nut.status_connected', 'Server Connesso'))}</strong>: ${escapeHtml(cfg.nut_host)}:${escapeHtml(cfg.nut_port)} (${escapeHtml(cfg.ups_name)})</span>
-          `;
-        } else {
-          nutBanner.className = 'security-status';
-          nutBanner.style.color = '#ef4444';
-          nutBanner.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-          nutBanner.innerHTML = `
-            <span class="status-dot offline"></span>
-            <span><strong>${escapeHtml(t('tab_nut.status_not_connected', 'Server Non Connesso'))}</strong>: ${escapeHtml(cfg.error_message || t('tab_nut.status_unreachable', 'Non raggiungibile'))}</span>
-          `;
-        }
-      }
-
-      // Security tab status
-      const secBadge = document.getElementById('security-status-badge');
-      if (secBadge) {
-        if (cfg.has_dashboard_password) {
-          secBadge.className = 'security-status protected';
-          secBadge.innerHTML = `
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            <span><strong>${t('tab_security.status_protected_strong', 'Accesso Protetto')}</strong>${t('tab_security.status_protected_desc', ': La dashboard richiede autenticazione con password.')}</span>
-          `;
-        } else {
-          secBadge.className = 'security-status';
-          secBadge.innerHTML = `
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span><strong>${t('tab_security.status_open_strong', 'Accesso Libero')}</strong>${t('tab_security.status_open_desc', ': Nessuna password impostata per la dashboard.')}</span>
-          `;
-        }
-      }
-
-      // Language selector value in modal
-      const langSel = document.getElementById('cfg-language');
-      if (langSel) {
-        langSel.value = currentLangSetting;
-      }
-
-      // Keep view mode cards in sync
-      switchMode(currentMode, false);
-    }
-
-    async function openSettingsModal() {
-      const toast = document.getElementById('settings-toast');
-      toast.innerText = '';
-      
-      try {
-        const res = await fetch('/api/settings');
-        if (res.status === 401) {
-          showLockScreen();
-          return;
-        }
-        const cfg = await res.json();
-        document.getElementById('cfg-nut-pwd').value = '';
-        document.getElementById('cfg-dash-pwd').value = '';
-
-        populateSettingsModal(cfg);
-
-        // Open on Status tab by default
-        switchSettingsTab('status');
-
-        document.getElementById('info-target-server').innerText = `${t('subbar.target_nut', 'Target NUT')}: ${cfg.nut_host}:${cfg.nut_port} (${cfg.ups_name})`;
-        document.getElementById('settings-modal').classList.add('active');
-      } catch (err) {
-        alert(t('toasts.alert_load_fail', 'Impossibile caricare le impostazioni: ') + err.message);
-      }
-    }
-
-    function closeSettingsModal() {
-      document.getElementById('settings-modal').classList.remove('active');
-    }
-
-    async function handleSaveSettings(e) {
-      e.preventDefault();
-      const toast = document.getElementById('settings-toast');
-      toast.style.color = '#38bdf8';
-      toast.innerText = t('toasts.saving', 'Salvataggio in corso...');
-
-      const host = document.getElementById('cfg-host').value.trim();
-      const port = parseInt(document.getElementById('cfg-port').value);
-      const upsName = document.getElementById('cfg-ups-name').value.trim();
-
-      if (!host || isNaN(port) || !upsName) {
-        switchSettingsTab('nut');
-        toast.style.color = '#ef4444';
-        toast.innerText = t('toasts.err_required_fields', 'Compila Host, Porta e Nome UPS nel tab Server NUT.');
-        return;
-      }
-
-      const pollVal = parseFloat(document.getElementById('cfg-poll-interval').value);
-      if (isNaN(pollVal) || pollVal < 0.5) {
-        switchSettingsTab('nut');
-        toast.style.color = '#ef4444';
-        toast.innerText = t('toasts.err_invalid_poll', 'Intervallo di aggiornamento non valido (minimo 0.5 secondi).');
-        return;
-      }
-
-      const payload = {
-        nut_host: host,
-        nut_port: port,
-        ups_name: upsName,
-        nut_user: document.getElementById('cfg-nut-user').value.trim(),
-        poll_interval: pollVal,
-      };
-
-      const nutPwd = document.getElementById('cfg-nut-pwd').value;
-      if (nutPwd) payload.nut_password = nutPwd;
-
-      const dashPwd = document.getElementById('cfg-dash-pwd').value;
-      if (dashPwd) payload.new_dashboard_password = dashPwd;
-
-      try {
-        const res = await fetch('/api/settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          toast.style.color = '#10b981';
-          toast.innerText = t('toasts.saved', 'Impostazioni salvate con successo!');
-          document.getElementById('info-target-server').innerText = `${t('subbar.target_nut', 'Target NUT')}: ${payload.nut_host}:${payload.nut_port} (${payload.ups_name})`;
-          restartPolling(pollVal);
-          setTimeout(() => {
-            closeSettingsModal();
-            fetchStats();
-          }, 1200);
-        } else {
-          toast.style.color = '#ef4444';
-          toast.innerText = t('toasts.err_prefix', 'Errore: ') + (data.error || 'Salvataggio fallito');
-        }
-      } catch (err) {
-        toast.style.color = '#ef4444';
-        toast.innerText = t('toasts.err_network', 'Errore di rete durante il salvataggio');
-      }
-    }
-
-    // ==========================================
-    // 7. BOOTSTRAP
-    // ==========================================
-    initLocales();
-    fetchStats();
-    restartPolling(2.0);
-
-    // Pause polling when browser tab/window is hidden or minimized
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        if (pollTimerId) {
-          clearInterval(pollTimerId);
-          pollTimerId = null;
-        }
-      } else {
-        const lockScreen = document.getElementById('lock-screen');
-        if (!lockScreen || !lockScreen.classList.contains('active')) {
-          fetchStats();
-          if (!pollTimerId) {
-            pollTimerId = setInterval(fetchStats, currentPollIntervalMs);
-          }
-        }
-      }
-    });
-
-    // ==========================================
-    // 8. PWA & SERVICE WORKER
-    // ==========================================
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const btn = document.getElementById('btn-install-pwa');
-      if (btn) btn.style.display = 'inline-flex';
-    });
-
-    async function triggerPwaInstall() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const choice = await deferredPrompt.userChoice;
-        if (choice && choice.outcome === 'accepted') {
-          const btn = document.getElementById('btn-install-pwa');
-          if (btn) btn.style.display = 'none';
-        }
-        deferredPrompt = null;
-      }
-    }
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(err => {
-          console.debug('ServiceWorker registration note:', err);
-        });
-      });
-    }
-  </script>
+  <!-- Viewport-Clamped Floating Tooltip -->
+  <div id="ui-tooltip" class="ui-tooltip" role="tooltip"></div>
+
+  <!-- Vanilla ES6 Application Entrypoint (zero external dependencies) -->
+  <script type="module" src="/js/app.js?v=__APP_VERSION__"></script>
 </body>
 </html>

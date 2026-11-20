@@ -1,43 +1,42 @@
-# Guida all'Aggiunta di Nuove Lingue / How to Add New Languages
+# Localization Guide (i18n)
 
-Questa cartella contiene i file di localizzazione (i18n) per **UPS Dashboard**.
-
-The UPS Dashboard features an automatic internationalization system based on JSON translation files located in this directory (`static/locales/`).
+This directory (`image/static/locales/`) stores JSON translation files for **UPS Web Dashboard**.
 
 ---
 
-## 🚀 Come Funziona il Sistema i18n / How It Works
+## How Auto-Discovery Works
 
-1. **Rilevamento Automatico (Auto-Discovery)**:
-   - Il backend Python scansiona automaticamente la cartella `static/locales/` alla ricerca di file `.json`.
-   - Ogni file valido viene registrato e reso disponibile nelle impostazioni della dashboard (nella scheda **Aspetto**).
-   - Non è necessario modificare il codice sorgente né ricompilare: basta aggiungere il file `.json` e riavviare o ricaricare!
+1. **Automatic Registration**:
+   - The Python backend (`LocaleRegistry`) scans `image/static/locales/` for all `*.json` files.
+   - Each valid file is automatically exposed via `GET /api/locales` and appears in **Settings → Appearance → Interface Language**.
+   - No backend or frontend code changes are required to add a new language.
 
-2. **Scelta della Lingua**:
-   - Di default, la lingua viene rilevata automaticamente dalle impostazioni del browser (`navigator.language`).
-   - Se la lingua del browser non è disponibile tra i file di traduzione, il sistema effettua automaticamente il **fallback su Inglese (`en`)**.
-   - L'utente può forzare manualmente la lingua desiderata dal menu delle impostazioni; la preferenza viene salvata in `localStorage`.
+2. **Language Selection & Fallback**:
+   - By default (`auto`), the UI detects the browser language (`navigator.language`).
+   - If the detected language is unavailable, the dashboard falls back to **English (`en`)**.
+   - Users can override the language manually in Settings; the preference is persisted in `localStorage`.
 
-3. **Fallback a livello di chiave**:
-   - Se una stringa o una chiave non è tradotta nel file JSON di una nuova lingua, viene mostrato il valore predefinito in lingua inglese.
-
----
-
-## 📁 Convenzione Nomi File / File Naming Convention
-
-Il nome del file deve corrispondere al codice lingua ISO 639-1 (a due lettere, minuscolo):
-- `it.json` -> Italiano
-- `en.json` -> English
-- `de.json` -> Deutsch
-- `fr.json` -> Français
-- `es.json` -> Español
-- `pt.json` -> Português
+3. **Per-Key Fallback**:
+   - If an individual key is missing from a locale file, `I18nManager` automatically falls back to the corresponding English string in `en.json`.
 
 ---
 
-## 🛠️ Struttura di un File di Traduzione / JSON Schema
+## File Naming Convention
 
-Ogni file `.json` deve contenere il blocco `_meta` seguito dalle varie sezioni di traduzione:
+Use the lowercase two-letter **ISO 639-1** language code:
+
+- `en.json` — English (canonical fallback)
+- `it.json` — Italiano
+- `de.json` — Deutsch
+- `fr.json` — Français
+- `es.json` — Español
+- `pt.json` — Português
+
+---
+
+## Translation JSON Schema
+
+Every locale file must define a `_meta` header followed by the UI translation sections. Preserve all placeholder tokens (`{pct}`, `{ups_rt}`, `{low_rt}`, `{load}`, `{batt}`) and HTML formatting tags verbatim.
 
 ```json
 {
@@ -69,9 +68,14 @@ Ogni file `.json` deve contenere il blocco `_meta` seguito dalle varie sezioni d
     "battery_critical": "Critique",
     "power_feed_label": "Alimentation",
     "feed_online": "Secteur électrique",
-    "feed_battery": "Batteria",
+    "feed_battery": "Batterie",
     "feed_bypass": "Bypass",
-    "feed_disconnected": "Déconnecté"
+    "feed_disconnected": "Déconnecté",
+    "blackout_duration_label": "Durée de la coupure",
+    "remaining_time_label": "Temps restant",
+    "shutdown_threshold_tooltip": "Seuil d'arrêt pour toutes les machines ({pct}%)",
+    "remaining_time_tooltip": "Calculé à partir du temps estimé par l'UPS ({ups_rt}) moins le seuil d'autonomie minimale ({low_rt}). Cette durée est indicative : le système peut s'éteindre plus tôt si la batterie descend sous le pourcentage configuré.",
+    "remaining_time_tooltip_no_low": "Temps estimé par l'UPS ({ups_rt}) — aucun seuil d'autonomie minimale configuré. Cette durée est indicative : le système peut s'éteindre plus tôt si la batterie descend sous le pourcentage configuré."
   },
   "subbar": {
     "target_nut": "Cible NUT",
@@ -102,6 +106,8 @@ Ogni file `.json` deve contenere il blocco `_meta` seguito dalle varie sezioni d
     "field_metrics": "Charge / Batterie",
     "field_refresh_rate": "Fréquence d'actualisation",
     "field_voltage": "Tension Secteur",
+    "field_charge_low": "Seuil de Charge Basse",
+    "field_runtime_low": "Seuil d'Autonomie Basse",
     "conn_online": "EN LIGNE",
     "conn_offline": "HORS LIGNE",
     "status_online": "EN LIGNE (OL)",
@@ -144,7 +150,11 @@ Ogni file `.json` deve contenere il blocco `_meta` seguito dalle varie sezioni d
     "mode_note": "Le mode choisi est appliqué immédiatement et mémorisé dans le navigateur.",
     "section_lang": "Langue de l'Interface",
     "lang_auto": "🌐 Automatique (Détectée par le navigateur)",
-    "lang_desc": "Sélectionnez la langue préférée ou conservez la détection automatique du navigateur."
+    "lang_desc": "Sélectionnez la langue préférée ou conservez la détection automatique du navigateur.",
+    "section_pwa": "Application Web (PWA)",
+    "pwa_title": "Application Mobile & Bureau",
+    "btn_install": "Installer",
+    "pwa_desc": "Installez le tableau de bord comme application plein écran : sur <strong>iOS (Safari)</strong> appuyez sur Partager ⎋ puis <em>\"Sur l'écran d'accueil\"</em> ; sur <strong>Android (Chrome)</strong> ouvrez le menu ⋮ puis sélectionnez <em>\"Installer l'application\"</em>."
   },
   "tab_security": {
     "section_auth_status": "État de l'Authentification",
@@ -194,17 +204,16 @@ Ogni file `.json` deve contenere il blocco `_meta` seguito dalle varie sezioni d
 
 ---
 
-## 📝 Guida Passo-Passo per Contribuire / Step-by-Step Guide
+## Step-by-Step Contribution Guide
 
-1. Copia uno dei file esistenti come base (es. `cp en.json es.json`).
-2. Aggiorna l'oggetto `_meta` con il codice lingua, nome localizzato ed emoji della bandiera:
-   ```json
-   "_meta": {
-     "code": "es",
-     "name": "Español",
-     "flag": "🇪🇸"
-   }
+1. Copy the English reference pack:
+   ```bash
+   cp image/static/locales/en.json image/static/locales/es.json
    ```
-3. Traduci tutte le stringhe mantenendo intatti i segnaposto come `{load}`, `{batt}` o tag HTML.
-4. Salva il file come codifica **UTF-8** (senza BOM).
-5. Ricarica la pagina: la nuova lingua comparirà immediatamente nel menu a tendina delle impostazioni!
+2. Update the `_meta` object with the ISO 639-1 code, native language name, and flag emoji.
+3. Translate all string values while keeping placeholders (e.g. `{pct}`, `{load}`, `{batt}`) and inline HTML tags intact.
+4. Save the file using **UTF-8** encoding (without BOM) and validate JSON syntax:
+   ```bash
+   python3 -m json.tool image/static/locales/es.json > /dev/null
+   ```
+5. Reload the dashboard — the new language will automatically appear in the language dropdown.

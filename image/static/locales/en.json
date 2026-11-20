@@ -29,7 +29,12 @@
     "feed_online": "Utility Power",
     "feed_battery": "Battery",
     "feed_bypass": "Bypass",
-    "feed_disconnected": "Disconnected"
+    "feed_disconnected": "Disconnected",
+    "blackout_duration_label": "Blackout Duration",
+    "remaining_time_label": "Remaining Time",
+    "shutdown_threshold_tooltip": "Shutdown threshold for all machines ({pct}%)",
+    "remaining_time_tooltip": "Calculated from UPS estimated runtime ({ups_rt}) minus the low runtime threshold ({low_rt}). This duration is indicative: the system may shut down earlier if the battery drops below the configured low-charge percentage.",
+    "remaining_time_tooltip_no_low": "UPS estimated runtime ({ups_rt}) — no low runtime threshold configured. This duration is indicative: the system may shut down earlier if the battery drops below the configured low-charge percentage."
   },
   "subbar": {
     "target_nut": "Target NUT",
@@ -60,6 +65,8 @@
     "field_metrics": "Load / Battery",
     "field_refresh_rate": "Refresh Rate",
     "field_voltage": "Mains Voltage",
+    "field_charge_low": "Low Charge Threshold",
+    "field_runtime_low": "Low Runtime Threshold",
     "conn_online": "ONLINE",
     "conn_offline": "OFFLINE",
     "status_online": "ONLINE (OL)",

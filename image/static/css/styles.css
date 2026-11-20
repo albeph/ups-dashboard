@@ -1,0 +1,1369 @@
+/* ==========================================================================
+   UPS Web Dashboard - Main Stylesheet
+   Zero-dependency vanilla CSS (dark theme, responsive layout, PWA-ready)
+   ========================================================================== */
+
+:root {
+  --bg-page: #0b0f19;
+  --bg-surface: #111827;
+  --bg-card: rgba(31, 41, 55, 0.45);
+  --bg-card-hover: rgba(31, 41, 55, 0.65);
+  --bg-control: #1f2937;
+  --border-subtle: #1f2937;
+  --border-default: #374151;
+  --border-hover: #4b5563;
+  --text-primary: #f9fafb;
+  --text-body: #e2e8f0;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
+  --accent-blue: #38bdf8;
+  --accent-blue-dark: #0284c7;
+  --accent-blue-darker: #0369a1;
+  --accent-green: #34d399;
+  --accent-green-solid: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* --------------------------------------------------------------------------
+   Base & Reset
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+}
+
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-body);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  max-width: 100vw;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Prevent iOS Safari auto-zoom when focusing form inputs */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   Top Navigation Bar
+   -------------------------------------------------------------------------- */
+.top-bar {
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--accent-blue-dark), var(--accent-blue-darker));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.45);
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.version-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--bg-control);
+  border: 1px solid var(--border-default);
+  color: var(--accent-blue);
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: 4px;
+  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 999px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.status-group.offline {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.status-group.warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green-solid);
+  box-shadow: 0 0 8px var(--accent-green-solid);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.status-dot.offline {
+  background: var(--accent-red);
+  box-shadow: 0 0 8px var(--accent-red);
+}
+
+.status-dot.warning {
+  background: var(--accent-amber);
+  box-shadow: 0 0 8px var(--accent-amber);
+}
+
+.status-text {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--accent-green-solid);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.status-text.offline {
+  color: var(--accent-red);
+}
+
+.status-text.warning {
+  color: var(--accent-amber);
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  background: var(--bg-control);
+  border: 1px solid var(--border-default);
+  color: #e5e7eb;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.action-btn:hover {
+  background: var(--border-default);
+  color: #ffffff;
+  border-color: var(--border-hover);
+}
+
+.action-btn:active {
+  transform: scale(0.97);
+}
+
+.action-btn.btn-lock {
+  display: none; /* Revealed only when dashboard password authentication is active */
+  color: var(--accent-blue);
+}
+
+/* --------------------------------------------------------------------------
+   Main Dashboard Layout & Primary Cards
+   -------------------------------------------------------------------------- */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+  max-width: 940px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.dashboard-panel {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 26px 28px;
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.dash-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dash-col .card {
+  flex: 1;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
+  transition: border-color 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.val-large {
+  font-size: 54px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.val-unit {
+  font-size: 22px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.unit-power {
+  color: var(--accent-blue);
+}
+
+.unit-batt {
+  color: var(--accent-green);
+}
+
+/* --------------------------------------------------------------------------
+   Display Mode A: Horizontal Progress Bars
+   -------------------------------------------------------------------------- */
+.bar-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-track-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.progress-track {
+  flex: 1;
+  width: 100%;
+  height: 11px;
+  background: #0f172a;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+}
+
+.batt-threshold-marker {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 24px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  z-index: 6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+#card-battery:hover .batt-threshold-marker,
+#card-battery:focus-within .batt-threshold-marker,
+.batt-threshold-marker.always-visible,
+.batt-threshold-marker.tooltip-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.batt-threshold-marker::after {
+  content: '';
+  width: 3px;
+  height: 11px;
+  background: var(--accent-red);
+  border-radius: 1px;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.85);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.batt-threshold-marker:hover::after,
+.batt-threshold-marker:focus-visible::after,
+.batt-threshold-marker.tooltip-open::after {
+  transform: scaleX(1.25);
+  box-shadow: 0 0 9px rgba(239, 68, 68, 1);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease, background 0.4s ease;
+}
+
+.fill-power {
+  background: linear-gradient(90deg, var(--accent-blue-dark), var(--accent-blue));
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.fill-batt {
+  background: linear-gradient(90deg, #059669, var(--accent-green));
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+}
+
+.pct-label {
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #f3f4f6;
+  min-width: 52px;
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   Display Mode B: Semicircle SVG Gauge
+   -------------------------------------------------------------------------- */
+.gauge-mode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gauge-container {
+  position: relative;
+  width: 105px;
+  height: 68px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.gauge-svg {
+  width: 105px;
+  height: 68px;
+}
+
+.gauge-bg {
+  fill: none;
+  stroke: var(--border-default);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.gauge-val {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 110;
+  stroke-dashoffset: 110;
+  transition: stroke-dashoffset 0.5s ease, stroke 0.4s ease;
+}
+
+.gauge-power {
+  stroke: var(--accent-blue);
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+}
+
+.gauge-batt {
+  stroke: var(--accent-green);
+  filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.5));
+}
+
+.gauge-threshold-group {
+  display: none;
+  cursor: help;
+  outline: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.gauge-threshold-hit {
+  stroke: transparent;
+  stroke-width: 12;
+  pointer-events: none;
+}
+
+#card-battery:hover .gauge-threshold-group,
+#card-battery:focus-within .gauge-threshold-group,
+.gauge-threshold-group.always-visible,
+.gauge-threshold-group.tooltip-open {
+  opacity: 1;
+}
+
+#card-battery:hover .gauge-threshold-hit,
+#card-battery:focus-within .gauge-threshold-hit,
+.gauge-threshold-group.always-visible .gauge-threshold-hit,
+.gauge-threshold-group.tooltip-open .gauge-threshold-hit {
+  pointer-events: stroke;
+}
+
+.gauge-threshold-line {
+  stroke: var(--accent-red);
+  stroke-width: 2.8;
+  stroke-linecap: butt;
+  filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.9));
+  pointer-events: none;
+  transition: stroke-width 0.15s ease;
+}
+
+.gauge-threshold-group:hover .gauge-threshold-line,
+.gauge-threshold-group.tooltip-open .gauge-threshold-line {
+  stroke-width: 3.5;
+}
+
+.gauge-text {
+  position: absolute;
+  bottom: 3px;
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Secondary Metric Cards (Voltage, Power Source, Discharge Counters)
+   -------------------------------------------------------------------------- */
+.sub-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sub-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+}
+
+.subbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.subbox-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.subbox-badge.voltage {
+  color: var(--accent-blue);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.subbox-badge.online {
+  color: var(--accent-green);
+}
+
+.subbox-badge.battery,
+.subbox-badge.warning {
+  color: var(--accent-amber);
+}
+
+.subbox-badge.offline {
+  color: var(--accent-red);
+}
+
+.sub-card.discharge-card {
+  display: none;
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.sub-card.discharge-card.visible {
+  display: flex;
+}
+
+.sub-card.discharge-card.interactive {
+  cursor: help;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.sub-card.discharge-card.interactive:hover,
+.sub-card.discharge-card.interactive:focus-visible,
+.sub-card.discharge-card.interactive.tooltip-open {
+  border-color: rgba(245, 158, 11, 0.65);
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.subbox-badge.blackout {
+  color: var(--accent-amber);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.subbox-badge.runtime {
+  color: var(--accent-amber);
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.subbox-badge.runtime.critical {
+  color: var(--accent-red);
+}
+
+.info-hint-icon {
+  opacity: 0.65;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sub-card.interactive:hover .info-hint-icon,
+.sub-card.interactive.tooltip-open .info-hint-icon {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Footer Sub-Bar Metadata
+   -------------------------------------------------------------------------- */
+.sub-bar {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Floating Viewport-Clamped Tooltip (Desktop Hover + Touch Tap)
+   -------------------------------------------------------------------------- */
+.ui-tooltip {
+  position: fixed;
+  z-index: 300;
+  max-width: min(320px, calc(100vw - 24px));
+  background: #0f172a;
+  color: #f1f5f9;
+  border: 1px solid #475569;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  visibility: hidden;
+}
+
+.ui-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+/* --------------------------------------------------------------------------
+   Settings Modal & Tabs
+   -------------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 550px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+
+.modal-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-tab-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.modal-tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.modal-tab-btn.active {
+  background: var(--bg-control);
+  color: var(--accent-blue);
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.tab-pane {
+  min-height: 200px;
+}
+
+/* --------------------------------------------------------------------------
+   Appearance Tab: Display Mode Cards & PWA Card
+   -------------------------------------------------------------------------- */
+.mode-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.mode-card {
+  background: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.mode-card:hover {
+  border-color: var(--border-default);
+  background: #0e1526;
+}
+
+.mode-card.active {
+  border-color: var(--accent-blue);
+  background: rgba(2, 132, 199, 0.1);
+  box-shadow: 0 0 0 1px var(--accent-blue);
+}
+
+.mode-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-radio {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border-hover);
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.mode-card.active .mode-radio {
+  border-color: var(--accent-blue);
+}
+
+.mode-card.active .mode-radio::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mode-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mode-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.mode-preview-bar {
+  height: 6px;
+  background: var(--bg-control);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.mode-preview-fill {
+  height: 100%;
+  width: 65%;
+  background: linear-gradient(90deg, var(--accent-blue-dark), var(--accent-blue));
+  border-radius: 999px;
+}
+
+.mode-preview-gauge {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.mode-note {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-top: 14px;
+  text-align: center;
+}
+
+.pwa-info-card {
+  background: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.pwa-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pwa-info-title {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pwa-install-btn {
+  display: none;
+  padding: 5px 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Status & Security Banners
+   -------------------------------------------------------------------------- */
+.security-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.security-status.protected {
+  color: var(--accent-green);
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.status-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-card {
+  background: var(--bg-page);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.status-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-pill.online {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.status-pill.offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-pill.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-amber);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-content {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding: 3px 0;
+}
+
+.status-label {
+  color: var(--text-muted);
+}
+
+.status-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.status-error-box {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   Forms, Inputs & Modal Action Buttons
+   -------------------------------------------------------------------------- */
+.poll-control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.poll-input {
+  width: 85px;
+  text-align: center;
+}
+
+.poll-unit {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.poll-presets {
+  display: flex;
+  gap: 6px;
+}
+
+.preset-btn {
+  background: var(--bg-page);
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+  padding: 6px 11px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: var(--bg-control);
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.preset-btn.active {
+  background: var(--accent-blue-dark);
+  color: #ffffff;
+  border-color: var(--accent-blue-dark);
+}
+
+.form-section {
+  margin-bottom: 18px;
+}
+
+.section-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent-blue);
+  margin-bottom: 10px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 5px;
+}
+
+.form-input {
+  background: var(--bg-page);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  padding: 10px 14px;
+  font-size: 16px; /* Prevents iOS Safari auto-zoom on focus */
+  border-radius: 9px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--accent-blue);
+}
+
+select.form-input {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.btn-save {
+  background: var(--accent-blue-dark);
+  color: #ffffff;
+  border: none;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-save:hover {
+  background: var(--accent-blue-darker);
+}
+
+.btn-cancel {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
+  padding: 9px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background: var(--bg-control);
+  color: var(--text-primary);
+}
+
+.toast-msg {
+  font-size: 12.5px;
+  min-height: 18px;
+  margin-top: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Password Lock Overlay
+   -------------------------------------------------------------------------- */
+.lock-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 15, 25, 0.95);
+  backdrop-filter: blur(10px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.lock-overlay.active {
+  display: flex;
+}
+
+.lock-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  padding: 32px 28px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
+}
+
+.lock-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.lock-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.lock-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+.lock-input {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.lock-submit {
+  width: 100%;
+  padding: 11px;
+}
+
+.lock-error {
+  color: var(--accent-red);
+  font-size: 12.5px;
+  margin-top: 10px;
+  min-height: 18px;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Breakpoints (Mobile & Narrow Viewports)
+   -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .brand-title {
+    display: none;
+  }
+
+  .top-bar {
+    padding: 10px 14px;
+  }
+
+  .action-btn {
+    padding: 8px 10px;
+    min-width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .action-btn .btn-text {
+    display: none;
+  }
+
+  .main-wrapper {
+    padding: 14px 10px;
+  }
+
+  .dashboard-panel {
+    padding: 16px 14px;
+    border-radius: 18px;
+  }
+
+  .card {
+    padding: 18px 16px !important;
+    min-height: auto !important;
+  }
+
+  .sub-card {
+    padding: 14px 16px !important;
+  }
+
+  .subbox-badge {
+    white-space: nowrap !important;
+    font-size: 14.5px !important;
+  }
+
+  .sub-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .version-badge {
+    display: none;
+  }
+
+  .status-group {
+    margin-left: 2px;
+    padding: 3px 8px;
+  }
+
+  .status-text {
+    font-size: 11.5px;
+  }
+
+  .modal-card {
+    padding: 18px 14px !important;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .mode-options-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}

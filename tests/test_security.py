@@ -1,4 +1,4 @@
-"""Tests for dashboard.security module."""
+"""Unit tests for the dashboard.security module."""
 
 import os
 import stat
@@ -10,6 +10,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from dashboard.security import (
     KeyManager,
+    PasswordHasher,
+    SecretCipher,
     SessionManager,
     decrypt_secret,
     encrypt_secret,
@@ -19,6 +21,7 @@ from dashboard.security import (
 
 
 class TestSecurity(unittest.TestCase):
+    """Tests for master key storage, PBKDF2 hashing, authenticated encryption, and sessions."""
 
     def test_key_manager_creation_and_reuse(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -27,26 +30,23 @@ class TestSecurity(unittest.TestCase):
             self.assertEqual(len(key1), 32)
             self.assertTrue(os.path.isfile(key_file))
 
-            # Check permissions (0600)
             file_mode = stat.S_IMODE(os.stat(key_file).st_mode)
             self.assertEqual(file_mode, 0o600)
 
-            # Check reuse
             key2 = KeyManager.get_or_create_key(key_file)
             self.assertEqual(key1, key2)
 
     def test_password_hashing_and_verification(self):
         plain = "SuperSecret123!"
-        hashed = hash_password(plain)
+        hashed = PasswordHasher.hash(plain)
         self.assertTrue(hashed.startswith("pbkdf2:sha256:100000$"))
+        self.assertTrue(PasswordHasher.is_hashed(hashed))
 
-        # Verify correct password
+        self.assertTrue(PasswordHasher.verify(plain, hashed))
         self.assertTrue(verify_password(plain, hashed))
-
-        # Verify incorrect password
         self.assertFalse(verify_password("WrongPassword", hashed))
 
-        # Empty inputs
+        # Empty and malformed inputs must safely fail.
         self.assertEqual(hash_password(""), "")
         self.assertFalse(verify_password("", hashed))
         self.assertFalse(verify_password(plain, ""))
@@ -54,51 +54,44 @@ class TestSecurity(unittest.TestCase):
 
     def test_secret_encryption_and_decryption(self):
         key = os.urandom(32)
+        cipher = SecretCipher(key)
         secret = "nut_password_secret_!@#$%"
 
-        enc = encrypt_secret(secret, key)
+        enc = cipher.encrypt(secret)
         self.assertTrue(enc.startswith("enc:v1:"))
+        self.assertEqual(cipher.decrypt(enc), secret)
+        self.assertEqual(decrypt_secret(enc, key), secret)
 
-        decrypted = decrypt_secret(enc, key)
-        self.assertEqual(decrypted, secret)
-
-        # Decrypt with wrong key should fail (tag mismatch)
+        # Wrong key must fail authentication tag validation.
         wrong_key = os.urandom(32)
         self.assertEqual(decrypt_secret(enc, wrong_key), "")
 
-        # Tampered ciphertext should fail
+        # Tampered ciphertext must fail authentication tag validation.
         parts = enc.split(":")
         tampered = f"{parts[0]}:{parts[1]}:{parts[2]}:00{parts[3][2:]}:{parts[4]}"
-        self.assertEqual(decrypt_secret(tampered, key), "")
+        self.assertEqual(cipher.decrypt(tampered), "")
 
-        # Empty inputs
+        # Empty inputs must return empty strings.
         self.assertEqual(encrypt_secret("", key), "")
         self.assertEqual(decrypt_secret("", key), "")
 
     def test_session_manager(self):
         sm = SessionManager()
 
-        # Generate session
         token = sm.create_session()
         self.assertTrue(sm.is_valid(token))
         self.assertFalse(sm.is_valid("nonexistent"))
         self.assertFalse(sm.is_valid(None))
 
-        # Cookie extraction
         cookie_header = f"foo=bar; {sm.cookie_name}={token}; other=123"
-        extracted = sm.extract_token_from_cookie(cookie_header)
-        self.assertEqual(extracted, token)
+        self.assertEqual(sm.extract_token_from_cookie(cookie_header), token)
 
-        # Auth header extraction
         bearer_header = f"Bearer {token}"
-        extracted_bearer = sm.extract_token_from_auth(bearer_header)
-        self.assertEqual(extracted_bearer, token)
+        self.assertEqual(sm.extract_token_from_auth(bearer_header), token)
 
-        # Invalidate session
         sm.invalidate(token)
         self.assertFalse(sm.is_valid(token))
 
-        # Cookie header builders
         set_cookie = sm.build_cookie_header("abc")
         self.assertIn("ups_dashboard_session=abc", set_cookie)
         self.assertIn("HttpOnly", set_cookie)

@@ -1,124 +1,127 @@
 # UPS Web Dashboard ⚡
 
-Una dashboard web ultra-leggera, moderna e reattiva per il monitoraggio in tempo reale dei gruppi di continuità (UPS) gestiti tramite **Network UPS Tools (NUT)**.
+A lightweight, responsive web dashboard and Progressive Web App (PWA) for monitoring Uninterruptible Power Supplies (UPS) managed by **Network UPS Tools (NUT)**.
 
-Progettata con un'architettura **zero-dipendenze**, offre un'impronta di memoria ridottissima (< 15 MB di RAM) ed è pronta per essere eseguita via **Docker** su qualsiasi piattaforma (PC, server, NAS o single-board computer a basso consumo come Raspberry Pi).
-
----
-
-## ✨ Funzionalità
-
-- **Visualizzazione Istantanea**:
-  - **Potenza Attiva (Watt)** e **Carico (%)**
-  - **Stato Carica Batteria (%)**
-- **Doppia Modalità Grafica (Intercambiabile)**:
-  - **Barre di Avanzamento**: barre lineari con gradiente cromatico e percentuale affiancata.
-  - **Semicerchio (Gauge SVG)**: indicatore ad arco posizionato alla destra del valore, animato in SVG vettoriale.
-  - La preferenza selezionata viene memorizzata automaticamente nel browser (`localStorage`).
-- **Autenticazione con Password Opzionale**:
-  - Accesso protetto con cookie di sessione crittografici sicuri.
-  - Se disabilitata, la dashboard è ad accesso diretto.
-- **Ultra-Leggera e Veloce**:
-  - Server HTTP e client TCP nativi in Python standard library (nessuna libreria `pip` esterna da compilare o installare).
-  - Frontend HTML5 / CSS3 / JavaScript vanilla: nessun framework pesante, zero chiamate a CDN esterni, funzionamento garantito anche in reti LAN isolate/air-gapped.
-- **Multi-Architettura**:
-  - Compatibile nativamente con `linux/amd64`, `linux/arm64` e `linux/arm/v7`.
+Built with **zero external dependencies** on both the backend and frontend, it runs cleanly on low-power single-board computers, NAS devices, and full servers with a minimal memory footprint (< 15 MB RAM) and full support for isolated/air-gapped LANs.
 
 ---
 
-## 🚀 Avvio Rapido con Docker
+## Features
 
-### 1. Clona il repository o copia la cartella
+- **Real-Time Telemetry**:
+  - **Active Power (Watts)** and **UPS Load (%)** with automatic wattage estimation when only nominal power is exposed by the UPS.
+  - **Battery Charge (%)** with visual shutdown-threshold marker (`battery.charge.low`).
+  - **Mains Voltage (V)** and **Power Source** indicator (Utility Power, On Battery, Bypass).
+  - **Outage Insights**: When on battery power, displays a live **Blackout Duration** counter and **Remaining Time** (UPS estimated runtime minus configured low-runtime threshold).
+- **Dual Visualization Modes**:
+  - **Horizontal Bars**: Clean linear progress bars with dynamic severity colors.
+  - **Semicircle Gauge**: Animated SVG arc dials inspired by analog meters.
+  - Switchable at any time from the Settings modal and remembered per browser.
+- **In-App Configuration**:
+  - Update NUT host, port, UPS identifier, optional NUT credentials, polling interval, display mode, language, and dashboard password directly from the Web UI.
+- **Optional Password Protection**:
+  - Protect access with a password lock screen or leave open for direct LAN viewing.
+- **Installable PWA & Mobile Friendly**:
+  - Responsive layout for desktop and mobile devices, installable as a standalone web app on iOS, Android, and desktop browsers.
+- **Multi-Language Support (i18n)**:
+  - Automatic browser language detection with built-in English and Italian translations, plus auto-discovery for community translation files.
+- **Demand-Driven Standby**:
+  - Automatically suspends NUT polling when no browser tabs are open or visible, and resumes immediately on demand.
+
+---
+
+## Quick Start (Docker Compose)
+
+### 1. Clone the repository
+
 ```bash
-git clone https://github.com/tuo-utente/ups-dashboard.git
+git clone https://github.com/<your-username>/ups-dashboard.git
 cd ups-dashboard
 ```
 
-### 2. Configura le variabili d'ambiente
-Copia il file di esempio `data/.env.example` in `data/.env`:
+### 2. Configure environment variables
+
+Copy the example configuration file if `data/.env` does not exist yet:
+
 ```bash
 cp data/.env.example data/.env
 ```
 
-Modifica `data/.env` con i parametri del tuo server NUT:
+Edit `data/.env` to match your NUT server:
+
 ```env
-NUT_HOST=192.168.1.50     # Indirizzo IP del server NUT
-NUT_PORT=3493             # Porta standard NUT
-UPS_NAME=ups              # Nome dell'UPS in ups.conf
-PORT=8080                 # Porta esposta della dashboard
-POLL_INTERVAL=2.0         # Frequenza di aggiornamento (secondi)
+NUT_HOST=192.168.1.50     # Hostname or IP of your NUT server
+NUT_PORT=3493             # Standard NUT TCP port
+UPS_NAME=ups              # UPS name configured in NUT's ups.conf
+PORT=8080                 # Host port exposed by the dashboard
+POLL_INTERVAL=2.0         # Refresh interval in seconds
 
-# Password opzionale (lascia vuoto per accesso libero)
-DASHBOARD_PASSWORD=tua_password_sicura
+# Optional dashboard password (leave unset for open access)
+# DASHBOARD_PASSWORD=change_me
 ```
 
-### 3. Avvia il container
+### 3. Start the container
+
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
-Apri il browser su:
-```
-http://<INDIRIZZO_IP_DEL_HOST>:8080
+Open your browser at:
+
+```text
+http://<HOST_IP>:8080
 ```
 
 ---
 
-## ⚙️ Variabili di Configurazione
+## Configuration Reference
 
-| Variabile | Default | Descrizione |
+Settings can be provided through environment variables in `data/.env` or updated live from **Settings → NUT Server** / **Security** in the web interface. Changes saved from the UI are persisted in `data/config.json`.
+
+| Variable | Default | Description |
 | :--- | :--- | :--- |
-| `NUT_HOST` | `127.0.0.1` | Hostname o indirizzo IP dove risiede il demone NUT `upsd`. |
-| `NUT_PORT` | `3493` | Porta TCP di ascolto del demone NUT. |
-| `UPS_NAME` | `ups` | Identificativo dell'UPS configurato nel server NUT. |
-| `NUT_USER` | *(vuoto)* | Username opzionale per l'autenticazione al server NUT. |
-| `NUT_PASSWORD` | *(vuoto)* | Password opzionale per l'autenticazione al server NUT. |
-| `PORT` | `8080` | Porta TCP su cui il container accetta connessioni web HTTP. |
-| `POLL_INTERVAL` | `2.0` | Secondi di intervallo tra le letture in background via socket TCP da NUT. |
-| `DASHBOARD_PASSWORD` | *(vuoto)* | Password di accesso. Se non impostata, l'accesso alla dashboard è pubblico. |
+| `NUT_HOST` | `127.0.0.1` | Hostname or IP address of the NUT `upsd` daemon. |
+| `NUT_PORT` | `3493` | TCP port of the NUT `upsd` daemon. |
+| `UPS_NAME` | `ups` | UPS identifier configured in NUT's `ups.conf`. |
+| `NUT_USER` | *(empty)* | Optional username for authenticated NUT connections. |
+| `NUT_PASSWORD` | *(empty)* | Optional password for authenticated NUT connections. |
+| `NUT_PASSWORD_FILE` | *(empty)* | Optional path to a file containing the NUT password (useful with Docker secrets). |
+| `PORT` | `8080` | TCP port where the dashboard HTTP server listens. |
+| `POLL_INTERVAL` | `2.0` | Polling interval in seconds (minimum `0.5`). |
+| `DASHBOARD_PASSWORD` | *(empty)* | Optional password to protect web access (accepts plaintext or pre-computed `pbkdf2:sha256:...` hash). |
 
 ---
 
-## 🛠️ Struttura del Progetto
+## Running Locally (Without Docker)
 
-```
-ups-dashboard/
-├── data/                   # Dati persistenti e configurazione ambiente
-│   ├── .env.example        # Template di configurazione
-│   ├── .env                # Variabili d'ambiente (generato)
-│   ├── config.json         # Impostazioni persistenti e credenziali cifrate
-│   └── .secret_key         # Chiave simmetrica protetta
-├── image/                  # Sorgenti e contesto di build dell'immagine Docker
-│   ├── Dockerfile          # Immagine Alpine multi-arch ultra-leggera
-│   ├── app.py              # Entrypoint applicativo
-│   ├── dashboard/          # Moduli Python (zero dipendenze pip, standard library)
-│   │   ├── config.py       # Gestione impostazioni e migrazione credenziali
-│   │   ├── security.py     # Cifratura, hashing PBKDF2 e gestione sessioni
-│   │   ├── nut.py          # Client TCP socket NUT e parser protocollo
-│   │   ├── collector.py    # Cache telemetria e gestione standby/wake
-│   │   ├── router.py       # Controller API REST e serving file statici
-│   │   ├── server.py       # Handler HTTP e ciclo di vita del server
-│   │   └── constants.py    # Costanti e risoluzione percorsi
-│   ├── VERSION             # Versione dell'applicazione
-│   └── static/             # Frontend completo (HTML, CSS, JS, icone, PWA)
-├── docker-compose.yml      # Configurazione Docker Compose
-└── README.md               # Documentazione
+Requires **Python 3.10+** (standard library only — no `pip install` needed):
+
+```bash
+NUT_HOST=127.0.0.1 UPS_NAME=ups python3 image/app.py
 ```
 
----
-
-## 🔒 Sicurezza
-
-- **Zero credenziali in chiaro**: Nessuna password viene mai salvata in chiaro sul filesystem.
-- **Password Dashboard con Hash Crittografico**: Le password di accesso al portale sono protette con hashing irreversibile con Salt `PBKDF2-HMAC-SHA256` (100.000 iterazioni) standard library Python.
-- **Password NUT con Cifratura a Riposo**: Le credenziali del demone NUT sono cifrate a riposo (`data/config.json`) tramite cifrario simmetrico autenticato (CTR + HMAC-SHA256) con chiave protetta in `data/.secret_key`.
-- **Permessi Filesystem Restrittivi**: I file di configurazione e le chiavi master sono automaticamente impostati con permessi `chmod 0600` (leggibili solo dall'utente del container).
-- **Protezione Timing Attacks**: Il confronto delle credenziali usa algoritmi `constant-time` (`secrets.compare_digest`).
-- **Cookie di Sessione Protetti**: Configurazione nativa con flag `HttpOnly` e `SameSite=Lax`.
-- **Esecuzione Non-Root**: Il container viene eseguito con un utente di sistema non-root (`appuser`, UID 1000).
+Then open `http://localhost:8080`.
 
 ---
 
-## 📄 Licenza
+## Adding Translations
 
-Rilasciato sotto licenza MIT. Libero per uso personale e commerciale.
+Localization files live in `image/static/locales/` and are automatically discovered at startup. See the [Localization Guide](image/static/locales/README.md) to contribute a new language.
+
+---
+
+## Architecture & Development
+
+For a full technical overview — including system architecture, OOP design, standby/wake lifecycle, NUT protocol handling, security model, and REST API specification — see the dedicated [Architecture Guide](docs/ARCHITECTURE.md).
+
+Run the test suite with:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
